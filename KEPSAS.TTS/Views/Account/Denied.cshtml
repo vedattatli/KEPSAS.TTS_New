@@ -1,0 +1,7 @@
+﻿@{
+	Layout = "_AuthLayout"; ViewData["Title"] = "Erişim Engellendi";
+}
+<div class="login-box">
+	<div class="alert alert-warning">Bu sayfaya erişim izniniz yok.</div>
+	<a class="btn btn-primary btn-block" href="@Url.Action("Login", "Account")">Giriş sayfasına dön</a>
+</div>

@@ -1,0 +1,22 @@
+﻿@{
+    ViewData["Title"] = "Talep Takip Sistemi";
+}
+<div class="row">
+    <div class="col-md-2"><div class="card card-kpi"><div class="card-body"><i class="fas fa-tasks"></i><div><div>Üzerimde</div><div class="num">@Model.Uzerimde</div></div></div></div></div>
+    <div class="col-md-2"><div class="card card-kpi"><div class="card-body"><i class="fas fa-times"></i><div><div>Onaysız</div><div class="num">@Model.Onaysiz</div></div></div></div></div>
+    <div class="col-md-2"><div class="card card-kpi"><div class="card-body"><i class="fas fa-check"></i><div><div>Onaylı</div><div class="num">@Model.Onayli</div></div></div></div></div>
+    <div class="col-md-2"><div class="card card-kpi"><div class="card-body"><i class="fas fa-user-clock"></i><div><div>Bekleyen</div><div class="num">@Model.Bekleyen</div></div></div></div></div>
+    <div class="col-md-2"><div class="card card-kpi"><div class="card-body"><i class="fas fa-exclamation"></i><div><div>Haricen</div><div class="num">@Model.Haric</div></div></div></div></div>
+</div>
+<div class="card mt-3">
+    <div class="card-header">Üzerimdeki Talepler</div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead><tr><th>No</th><th>Talep Sahibi</th><th>Son İşlem</th><th></th></tr></thead>
+            <tbody>
+                <tr><td>86532</td><td>Kübra Ç.</td><td>30.08.2025 09:35</td><td><a class="btn btn-sm btn-primary">Aç</a></td></tr>
+                <!-- gerçek veriyi sonra bağlayacağız -->
+            </tbody>
+        </table>
+    </div>
+</div>

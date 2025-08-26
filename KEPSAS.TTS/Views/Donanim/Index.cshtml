@@ -1,0 +1,34 @@
+﻿// Views/Donanim/Index.cshtml (Admin Envanteri)
+@model TalepTakipSistemi.ViewModels.DonanimListeViewModel
+@{
+    ViewData["Title"] = "Donanım Envanteri";
+}
+
+<div class="content-card">
+    <div class="content-card-header">Tüm Donanımlar</div>
+    <table class="table content-table mb-0">
+        <thead>
+            <tr>
+                <th>Seri No</th>
+                <th>Model</th>
+                <th>Kategori</th>
+                <th>Atanan Kullanıcı</th>
+                <th>Durum</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var donanim in Model.Donanimlar)
+            {
+                <tr>
+                    <td><strong>@donanim.SeriNo</strong></td>
+                    <td>@donanim.Model</td>
+                    <td>@donanim.Kategori</td>
+                    <td>@donanim.AtananKullanici</td>
+                    <td><span class="status-badge @(donanim.Durum == "Kullanımda" ? "uzerimde" : "beklemede")">@donanim.Durum</span></td>
+                    <td><a href="#" class="btn btn-sm btn-outline-primary">Detay</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

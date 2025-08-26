@@ -1,0 +1,110 @@
+﻿@{
+    var title = ViewData["Title"] as string ?? "KEPSAŞ - Talep Takip Sistemi";
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@title</title>
+
+    <!-- Modern Font Ailesi: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Gerekli Kütüphaneler -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" />
+
+    <!-- Yeni Nesil Stil Dosyamız -->
+    <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sol Dikey Menü -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <span class="logo">TTS</span>
+                <span class="logo-text">Talep Takip</span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="@Url.Action("Index", "Home")" class="nav-item active">
+                    <i class="fa-solid fa-house-chimney"></i>
+                    <span>Gösterge Paneli</span>
+                </a>
+
+                <div class="nav-divider">Talepler</div>
+                <a href="@Url.Action("Index", "Talep")" class="nav-item">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span>Taleplerim</span>
+                </a>
+                <a href="@Url.Action("Create", "Talep")" class="nav-item">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Yeni Talep</span>
+                </a>
+
+                <div class="nav-divider">Donanım</div>
+                <a href="@Url.Action("Kullandiklarim", "Donanim")" class="nav-item">
+                    <i class="fa-solid fa-desktop"></i>
+                    <span>Donanımlarım</span>
+                </a>
+
+                @if (User.IsInRole("Admin"))
+                {
+                    <div class="nav-divider">Yönetim Paneli</div>
+                    <a href="@Url.Action("Index", "Donanim")" class="nav-item">
+                        <i class="fa-solid fa-boxes-stacked"></i>
+                        <span>Envanter Yönetimi</span>
+                    </a>
+                    <a href="@Url.Action("Create", "Donanim")" class="nav-item">
+                        <i class="fa-solid fa-plus-circle"></i>
+                        <span>Yeni Donanım Ekle</span>
+                    </a>
+                    <a href="@Url.Action("Index", "Users")" class="nav-item">
+                        <i class="fa-solid fa-users-cog"></i>
+                        <span>Kullanıcı Yönetimi</span>
+                    </a>
+                }
+            </nav>
+            <div class="sidebar-footer">
+                <form asp-controller="Account" asp-action="Logout" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="logout-button">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                        <span>Güvenli Çıkış</span>
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- Ana İçerik Alanı -->
+        <div class="main-content">
+            <header class="topbar">
+                <div class="page-title">@title</div>
+                <div class="user-profile">
+                    <span>@User.Identity?.Name</span>
+                    <div class="user-avatar">@User.Identity?.Name?.FirstOrDefault()</div>
+                </div>
+            </header>
+            <main class="content-body">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <!-- Global Modal Konteyneri -->
+    <div class="modal fade" id="appModal" tabindex="-1" role="dialog" aria-labelledby="appModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                @* Modal içeriği buraya dinamik olarak yüklenecek *@
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/app.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

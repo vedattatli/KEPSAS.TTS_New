@@ -1,0 +1,62 @@
+﻿@model IEnumerable<KEPSAS.TTS.ViewModels.UserRowVm>
+@{
+    ViewData["Title"] = "Kullanıcılar";
+}
+
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap4.min.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap4.min.css" />
+
+<div class="card card-primary">
+    <div class="card-header"><h3 class="card-title">Kullanıcı Listesi</h3></div>
+    <div class="card-body">
+        <table id="usersTable" class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Adı Soyadı / Kullanıcı Adı</th>
+                    <th>E-posta</th>
+                    <th>Rol</th>
+                    <th style="width:160px">İşlem</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var u in Model)
+                {
+                    <tr>
+                        <td>@($"{u.Ad} {u.Soyad}".Trim()) (@u.UserName)</td>
+                        <td>@u.Email</td>
+                        <td>@(u.IsAdmin ? "Admin" : "User")</td>
+                        <td>
+                            <form asp-action="ToggleRole" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@u.Id" />
+                                <button type="submit" class="btn btn-sm @(u.IsAdmin ? "btn-warning" : "btn-primary")">
+                                    @(u.IsAdmin ? "Admin → User" : "User → Admin")
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap4.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap4.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+    <script>
+        $(function () {
+          $('#usersTable').DataTable({
+            responsive: true, lengthChange: false, autoWidth: false,
+            pageLength: 25, order: [[0, 'asc']],
+            language: { url: 'https://cdn.datatables.net/plug-ins/1.13.8/i18n/tr.json' }
+          });
+        });
+    </script>
+}

@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36408.4 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KEPSAS.TTS", "KEPSAS.TTS\KEPSAS.TTS.csproj", "{A40A4C11-A7BD-4504-8D9C-A5C7AAEEA735}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A40A4C11-A7BD-4504-8D9C-A5C7AAEEA735}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A40A4C11-A7BD-4504-8D9C-A5C7AAEEA735}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A40A4C11-A7BD-4504-8D9C-A5C7AAEEA735}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A40A4C11-A7BD-4504-8D9C-A5C7AAEEA735}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4EF9FB7D-8031-4922-8297-9E5940B4D6B7}
+	EndGlobalSection
+EndGlobal

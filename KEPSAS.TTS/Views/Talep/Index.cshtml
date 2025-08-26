@@ -1,0 +1,99 @@
+﻿@model IEnumerable<KEPSAS.TTS.Models.Talep>
+@{
+    ViewData["Title"] = "Talepler";
+    var durumlar = new[] { "Beklemede", "Üzerimde", "Onaysız", "Onaylı", "Yönetici Onayında", "Dış Serviste", "Gecikmiş" };
+
+    // Query değerlerini güvenli şekilde alalım
+    string qDurum = Context.Request.Query["durum"];
+    string qD1 = Context.Request.Query["d1"];
+    string qD2 = Context.Request.Query["d2"];
+    string qText = Context.Request.Query["q"];
+}
+
+<div class="card mb-3">
+    <div class="card-header">Filtre</div>
+    <div class="card-body">
+        <form method="get" class="form-row">
+            <div class="col-md-2">
+                <label>Durum</label>
+                <select name="durum" class="form-control">
+                    <option value="">(Hepsi)</option>
+                    @foreach (var d in durumlar)
+                    {
+                        <option value="@d" selected="@(qDurum == d ? "selected" : null)">@d</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label>Tarih (den)</label>
+                <input type="date" name="d1" value="@qD1" class="form-control" />
+            </div>
+
+            <div class="col-md-2">
+                <label>Tarih (e kadar)</label>
+                <input type="date" name="d2" value="@qD2" class="form-control" />
+            </div>
+
+            <div class="col-md-4">
+                <label>Arama</label>
+                <input name="q" value="@qText" class="form-control" placeholder="Başlık / açıklama" />
+            </div>
+
+            <div class="col-md-2 d-flex align-items-end">
+                <button class="btn btn-primary btn-block">Uygula</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <div>Liste</div>
+        <a class="btn btn-sm btn-success" href="@Url.Action("Create")"><i class="far fa-plus-square"></i> Yeni</a>
+    </div>
+
+    <div class="card-body p-0">
+        <table id="tbl" class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Başlık</th>
+                    <th>Durum</th>
+                    <th>Oluşturma</th>
+                    <th style="width:140px"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var t in Model)
+                {
+                    <tr>
+                        <td>@t.Id</td>
+                        <td>@t.Baslik</td>
+                        <td>@t.Durum</td>
+                        <td>@t.OlusturmaTarihi.ToLocalTime():dd.MM.yyyy HH:mm</td>
+                        <td>
+                            <a class="btn btn-sm btn-outline-primary" href="@Url.Action("Details", new { id = t.Id })">Aç</a>
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    data-modal-url="@Url.Action("Yonlendir", "Talep", new { id = t.Id })">
+                                Yönlendir
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function(){
+          $('#tbl').DataTable({
+            language:{ url: window.DT_TR },
+            pageLength: 25,
+            order:[[3,'desc']]
+          });
+        });
+    </script>
+}

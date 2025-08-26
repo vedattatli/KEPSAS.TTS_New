@@ -1,0 +1,68 @@
+﻿@model KEPSAS.TTS.ViewModels.TalepDetayViewModel
+@{
+    ViewData["Title"] = $"Talep Detayı: #{Model.Id}";
+}
+
+<div class="row">
+    <!-- Sol Sütun: Talep Bilgileri ve Aksiyonlar -->
+    <div class="col-lg-7">
+        <div class="content-card">
+            <div class="content-card-header d-flex justify-content-between align-items-center">
+                <span>@Model.Baslik</span>
+                <span class="status-badge @Model.Durum.ToLower()">@Model.Durum</span>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">@Model.Aciklama</p>
+                <hr>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <strong>Oluşturan:</strong> @Model.OlusturanKullanici <br>
+                        <strong>Oluşturma Tarihi:</strong> @Model.OlusturmaTarihi.ToString("dd.MM.yyyy HH:mm")
+                    </div>
+                    <div class="col-sm-6">
+                        <strong>Atanan Kişi:</strong> @Model.AtananKullanici <br>
+                        <strong>Öncelik:</strong> @Model.Oncelik
+                    </div>
+                </div>
+            </div>
+            @if (User.IsInRole("Admin"))
+            {
+                <div class="card-footer bg-light">
+                    <h6 class="mb-3">Yönetici Aksiyonları</h6>
+                    <button class="btn btn-success btn-sm"><i class="fa-solid fa-check mr-1"></i> Tamamlandı Olarak İşaretle</button>
+                    <button class="btn btn-info btn-sm"
+                            data-modal-url="@Url.Action("Yonlendir", "Talep", new { id = Model.Id })">
+                        <i class="fa-solid fa-random mr-1"></i> Başka Birine Yönlendir
+                    </button>
+                    <button class="btn btn-danger btn-sm"><i class="fa-solid fa-times mr-1"></i> Talebi İptal Et</button>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Sağ Sütun: Talep Geçmişi (Timeline) -->
+    <div class="col-lg-5">
+        <div class="content-card">
+            <div class="content-card-header">
+                Talep Hareket Geçmişi
+            </div>
+            <div class="card-body">
+                <ul class="timeline">
+                    @foreach (var hareket in Model.HareketGecmisi.OrderByDescending(h => h.Tarih))
+                    {
+                        <li>
+                            <i class="@hareket.Ikon @hareket.Renk"></i>
+                            <div class="timeline-item">
+                                <span class="time"><i class="fa-regular fa-clock"></i> @hareket.Tarih.ToString("dd.MM.yyyy HH:mm")</span>
+                                <h3 class="timeline-header"><strong>@hareket.IslemYapan</strong></h3>
+                                <div class="timeline-body">
+                                    @hareket.Aciklama
+                                </div>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

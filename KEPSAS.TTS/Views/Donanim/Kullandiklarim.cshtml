@@ -1,0 +1,29 @@
+﻿@model TalepTakipSistemi.ViewModels.DonanimListeViewModel
+@{
+    ViewData["Title"] = "Kullandığım Donanımlar";
+}
+
+<div class="content-card">
+    <div class="content-card-header">Üzerinize Atanmış Donanımların Listesi</div>
+    <table class="table content-table mb-0">
+        <thead>
+            <tr>
+                <th>Seri No</th>
+                <th>Model</th>
+                <th>Kategori</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var donanim in Model.Donanimlar)
+            {
+                <tr>
+                    <td><strong>@donanim.SeriNo</strong></td>
+                    <td>@donanim.Model</td>
+                    <td>@donanim.Kategori</td>
+                    <td><a href="#" class="btn btn-sm btn-outline-primary">Arıza Bildir</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

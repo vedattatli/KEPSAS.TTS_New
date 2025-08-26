@@ -1,0 +1,55 @@
+﻿@model KEPSAS.TTS.ViewModels.DonanimEkleViewModel
+@{
+    ViewData["Title"] = "Yeni Donanım Ekle";
+}
+
+<div class="content-card">
+    <div class="content-card-header">
+        Envantere Yeni Donanım Kaydı
+    </div>
+    <form asp-action="Create" method="post">
+        <div class="card-body">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="form-group">
+                <label asp-for="SeriNo"></label>
+                <input asp-for="SeriNo" class="form-control" />
+                <span asp-validation-for="SeriNo" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Model"></label>
+                <input asp-for="Model" class="form-control" placeholder="Örn: Dell Latitude 5520" />
+                <span asp-validation-for="Model" class="text-danger"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="Kategori"></label>
+                        <select asp-for="Kategori" class="form-control">
+                            <option value="">Kategori Seçin...</option>
+                            <option>Laptop</option>
+                            <option>Monitör</option>
+                            <option>Klavye</option>
+                            <option>Mouse</option>
+                            <option>Yazıcı</option>
+                        </select>
+                        <span asp-validation-for="Kategori" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="AlinmaTarihi"></label>
+                        <input asp-for="AlinmaTarihi" class="form-control" />
+                        <span asp-validation-for="AlinmaTarihi" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer bg-light text-right">
+            <a asp-action="Index" class="btn btn-secondary">İptal</a>
+            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save mr-2"></i>Kaydet</button>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,20 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>@ViewData["Title"] - KEPSAS.TTS</title>
+
+	<link rel="stylesheet" href="~/AdminLTE/css/adminlte.min.css" />
+	<link rel="stylesheet" href="~/AdminLTE/plugins/fontawesome-free/css/all.min.css" />
+	<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+</head>
+<body class="hold-transition login-page">
+	@RenderBody()
+
+	<script src="~/lib/jquery/dist/jquery.min.js"></script>
+	<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="~/AdminLTE/js/adminlte.min.js"></script>
+	@RenderSection("Scripts", required: false)
+</body>
+</html>

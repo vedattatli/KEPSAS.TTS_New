@@ -1,0 +1,29 @@
+﻿@model KEPSAS.TTS.ViewModels.TalepYonlendirViewModel
+
+<form asp-action="Yonlendir" method="post">
+    <div class="modal-header">
+        <h5 class="modal-title">Talebi Yönlendir (#@Model.TalepId)</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <input type="hidden" asp-for="TalepId" />
+
+        <div class="form-group">
+            <label asp-for="AtanacakKullaniciId">Atanacak Personel</label>
+            <select asp-for="AtanacakKullaniciId" asp-items="Model.KullanicilarListesi" class="form-control">
+                <option value="">Lütfen bir personel seçin...</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="YonlendirmeNotu">Yönlendirme Notu (Opsiyonel)</label>
+            <textarea asp-for="YonlendirmeNotu" class="form-control" rows="3"></textarea>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
+        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check mr-2"></i>Yönlendir</button>
+    </div>
+</form>

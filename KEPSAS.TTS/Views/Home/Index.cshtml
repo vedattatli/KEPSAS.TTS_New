@@ -1,0 +1,68 @@
+﻿@model TalepTakipSistemi.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Gösterge Paneli";
+}
+
+<!-- İstatistik Kartları -->
+<div class="stats-grid">
+    <div class="stat-card" style="--color: #3b82f6;">
+        <div class="icon"><i class="fa-solid fa-user-tag"></i></div>
+        <div class="title">Üzerimde</div>
+        <div class="value">@Model.UzerimdeTalepler</div>
+    </div>
+    <div class="stat-card" style="--color: #ef4444;">
+        <div class="icon"><i class="fa-solid fa-times-circle"></i></div>
+        <div class="title">Onaysız</div>
+        <div class="value">@Model.OnaysizTalepler</div>
+    </div>
+    <div class="stat-card" style="--color: #22c55e;">
+        <div class="icon"><i class="fa-solid fa-check-circle"></i></div>
+        <div class="title">Onaylı</div>
+        <div class="value">@Model.OnayliTalepler</div>
+    </div>
+    <div class="stat-card" style="--color: #f97316;">
+        <div class="icon"><i class="fa-solid fa-user-shield"></i></div>
+        <div class="title">Yönetici Onayında</div>
+        <div class="value">@Model.YoneticiOnayindaTalepler</div>
+    </div>
+    <div class="stat-card" style="--color: #6b7280;">
+        <div class="icon"><i class="fa-solid fa-shipping-fast"></i></div>
+        <div class="title">Dış Serviste</div>
+        <div class="value">@Model.DisServisteTalepler</div>
+    </div>
+    <div class="stat-card" style="--color: #f59e0b;">
+        <div class="icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <div class="title">Gecikmiş</div>
+        <div class="value">@Model.GecikmisTalepler</div>
+    </div>
+</div>
+
+<!-- Son Talepler Tablosu -->
+<div class="content-card">
+    <div class="content-card-header">
+        Son Talepler
+    </div>
+    <table class="table content-table mb-0">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Başlık</th>
+                <th>Durum</th>
+                <th>Oluşturma</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var talep in Model.SonTalepler)
+            {
+                <tr>
+                    <td>#@talep.Id</td>
+                    <td>@talep.Baslik</td>
+                    <td><span class="status-badge @talep.Durum.ToLower()">@talep.Durum</span></td>
+                    <td>@talep.OlusturmaTarihi</td>
+                    <td><a href="@Url.Action("Details", "Talep", new { id = talep.Id })" class="btn btn-sm btn-outline-primary">Aç</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
