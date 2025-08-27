@@ -1,4 +1,4 @@
-# KEPSAS TTS – Talep ve Donanım Takip Sistemi
+# KEPSAS TTS – Talep & Donanım Takip Sistemi
 
 Kurumsal IT destek süreçlerini yönetmek için geliştirilmiş **Talep ve Donanım Takip Sistemi**.  
 ASP.NET Core MVC, Entity Framework Core ve Identity tabanlı kullanıcı/rol yönetimi içerir.
@@ -46,32 +46,74 @@ ASP.NET Core MVC, Entity Framework Core ve Identity tabanlı kullanıcı/rol yö
 
 ---
 
-## 📦 Kurulum
-1. Projeyi klonla:
+## 📦 Mimari ve Geliştirme Ortamı
+
+Bu proje **çoklu VM mimarisi** ile çalışır.  
+- **DB-VM (SQL Server)** → Veritabanı barındırır.  
+- **APP-VM (ASP.NET Core)** → Uygulamayı barındırır.  
+- **CLIENT (tarayıcı / başka VM)** → Web üzerinden uygulamaya bağlanır.  
+
+**Örnek Topoloji:**
+- DB-VM → `192.168.1.10`  
+- APP-VM → `192.168.1.11`  
+- Client → `http://192.168.1.11:5000`
+
+---
+
+## ⚙️ Kurulum
+
+### Gereksinimler
+- .NET 7/8 SDK
+- Visual Studio 2022 veya Rider
+- SQL Server (ayrı VM üzerinde de olabilir)
+
+### 1. DB-VM (SQL Server)
+1. SQL Server kur ve dış bağlantıya izin ver.  
+2. Statik IP ata (örn. `192.168.1.10`).  
+3. `KEPSAS_TTS` isminde boş bir DB oluştur.
+
+### 2. APP-VM (Uygulama)
+1. Projeyi klonla:  
    ```bash
    git clone https://github.com/kullanici/KEPSAS.TTS.git
    cd KEPSAS.TTS
-appsettings.json içinde ConnectionString ayarını kendi SQL Server bilgine göre düzenle.
-👉 Öneri: appsettings.json yerine User Secrets veya Environment Variables kullan.
+appsettings.json içinde ConnectionString’i DB VM IP’sine göre güncelle:
 
-Migration ve database update yap:
+json
+Copy code
+"DefaultConnection": "Server=192.168.1.10;Database=KEPSAS_TTS;User Id=sa;Password=Parola123;TrustServerCertificate=True"
+Migration & DB update çalıştır:
 
 bash
 Copy code
 dotnet ef database update
-Projeyi çalıştır:
+Uygulamayı başlat:
 
 bash
 Copy code
 dotnet run
-Varsayılan kullanıcılar:
+APP-VM IP’sinden eriş: http://192.168.1.11:5000
+
+3. Client
+Tarayıcıdan http://192.168.1.11:5000 adresine git.
+
+Giriş yap:
 
 Admin: admin@kepsas.com / Admin!234
 
-Demo User: demo@kepsas.com / Demo.1234
+User: demo@kepsas.com / Demo.1234
+
+🐳 Docker (Opsiyonel – Daha Profesyonel)
+VM’lerle uğraşmak istemezsen, uygulamayı ve SQL Server’ı Docker Compose ile çalıştırabilirsin.
+Bu sayede tek komutla kurulur:
+
+bash
+Copy code
+docker-compose up
+Dockerfile ve docker-compose.yml daha sonra eklenecektir.
 
 📊 Ekran Görselleri
-Buraya proje çalışırken alınmış ekran görüntülerini ekleyebilirsiniz.
+Buraya proje çalışırken alınmış ekran görüntülerini ekleyin.
 
 📄 Lisans
 Bu proje MIT lisansı ile yayınlanmıştır.
