@@ -1,62 +1,109 @@
 ﻿@model KEPSAS.TTS.Models.Talep
-@using KEPSAS.TTS.Data
 @{
-    ViewData["Title"] = $"Talep Detayı: #{Model.Id}";
-    bool isAdmin = User.IsInRole("Admin");
+    ViewData["Title"] = "Talep Detay";
+    var isAdmin = User.IsInRole("Admin");
 }
 
-<div class="row">
-    <div class="col-lg-8">
-        <div class="content-card">
-            <div class="content-card-header">Talep Bilgileri</div>
-            <div class="p-3">
-                <div class="mb-2"><strong>Başlık:</strong> @Model.Baslik</div>
-                <div class="mb-2"><strong>Durum:</strong> @Model.Durum</div>
-                <div class="mb-2"><strong>Oluşturan:</strong> @(Model.OlusturanKullaniciId ?? "-")</div>
-                <div class="mb-2"><strong>Oluşturan:</strong> @(Model.OlusturanKullaniciId ?? "-")</div>
-                <hr />
-                <div>@(Model.Aciklama ?? "-")</div>
+<h3>Talep Detay</h3>
+<hr />
+
+<div class="row g-3">
+    <div class="col-md-8">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h4 class="card-title">@Model.Baslik</h4>
+                <p class="card-text">@Model.Aciklama</p>
+
+                <dl class="row">
+                    <dt class="col-sm-4">Tip</dt>
+                    <dd class="col-sm-8">@Model.Tip</dd>
+
+                    @if (Model.Tip == KEPSAS.TTS.Models.TalepTipi.Donanim)
+                    {
+                        <dt class="col-sm-4">Donanım</dt>
+                        <dd class="col-sm-8">@Model.Donanim?.Kategori - @Model.Donanim?.Model (@Model.Donanim?.SeriNo)</dd>
+                    }
+                    @if (Model.Tip == KEPSAS.TTS.Models.TalepTipi.Yazilim)
+                    {
+                        <dt class="col-sm-4">Yazılım</dt>
+                        <dd class="col-sm-8">@Model.YazilimAdi</dd>
+                    }
+
+                    <dt class="col-sm-4">Durum</dt>
+                    <dd class="col-sm-8">@Model.Durum</dd>
+
+                    <dt class="col-sm-4">Oluşturan</dt>
+                    <dd class="col-sm-8">@Model.OlusturanKullanici?.UserName</dd>
+
+                    <dt class="col-sm-4">Atanan</dt>
+                    <dd class="col-sm-8">@Model.AtananKullanici?.UserName ?? "-"</dd>
+
+                    <dt class="col-sm-4">Hedef Personel</dt>
+                    <dd class="col-sm-8">@Model.HedefKullanici?.UserName ?? ("-" + (Model.HedefSicilNo ?? ""))</dd>
+
+                    <dt class="col-sm-4">IP</dt>
+                    <dd class="col-sm-8">@Model.IpAdresi</dd>
+
+                    <dt class="col-sm-4">Oluşturma</dt>
+                    <dd class="col-sm-8">@Model.OlusturmaTarihi.ToLocalTime()</dd>
+                </dl>
+
+                @if (!string.IsNullOrWhiteSpace(Model.IptalNedeni))
+                {
+                    <div class="alert alert-warning">
+                        <strong>İptal Nedeni:</strong> @Model.IptalNedeni
+                    </div>
+                }
             </div>
         </div>
     </div>
 
-    <div class="col-lg-4">
-        <div class="content-card">
-            <div class="content-card-header">İşlemler</div>
-            <div class="p-3">
-                @if (isAdmin)
-                {
-                    <!-- Atama -->
-                    <form asp-action="Assign" method="post" class="mb-3">
-                        @Html.AntiForgeryToken()
+    @if (isAdmin)
+    {
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-header">Atama</div>
+                <div class="card-body">
+                    <form asp-action="Assign" method="post">
                         <input type="hidden" name="id" value="@Model.Id" />
-                        <label>Atanacak Kullanıcı</label>
-                        <select name="userId" class="form-control">
-                            <option value="">(Atama kaldır)</option>
-                            @foreach (var u in ViewBag.AssignableUsers as IEnumerable<SelectListItem> ?? Enumerable.Empty<SelectListItem>())
-                            {
-                                <option value="@u.Value" selected="@(Model.AtananKullaniciId == u.Value)">
-                                    @u.Text
-                                </option>
-                            }
-                        </select>
-                        <button class="btn btn-sm btn-outline-primary mt-2">Kaydet</button>
+                        <div class="mb-2">
+                            <select name="userId" class="form-select" asp-items="(IEnumerable<SelectListItem>)ViewBag.AssignableUsers">
+                                <option value="">(Atama kaldır)</option>
+                            </select>
+                        </div>
+                        <div class="mb-2">
+                            <input name="note" class="form-control" placeholder="Not (opsiyonel)" />
+                        </div>
+                        <button class="btn btn-primary w-100" type="submit">Kaydet</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">Durum</div>
+                <div class="card-body">
+                    <form asp-action="SetStatus" method="post" class="mb-2">
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <div class="input-group">
+                            <select name="durum" class="form-select">
+                                <option>Yeni</option>
+                                <option>Üzerimde</option>
+                                <option>Onaylı</option>
+                                <option>Tamamlandı</option>
+                            </select>
+                            <button class="btn btn-success" type="submit">Güncelle</button>
+                        </div>
                     </form>
 
-                    <!-- Hızlı Durum -->
-                    <form asp-action="SetStatus" method="post" class="d-flex flex-wrap gap-2">
-                        @Html.AntiForgeryToken()
+                    <form asp-action="Cancel" method="post">
                         <input type="hidden" name="id" value="@Model.Id" />
-                        <button name="durum" value="Üzerimde" class="btn btn-sm btn-info mr-2">Üzerimde</button>
-                        <button name="durum" value="Bekliyor" class="btn btn-sm btn-warning mr-2">Bekliyor</button>
-                        <button name="durum" value="Tamamlandı" class="btn btn-sm btn-success">Tamamlandı</button>
+                        <div class="input-group">
+                            <input name="reason" class="form-control" placeholder="İptal nedeni" />
+                            <button class="btn btn-danger" type="submit">İptal Et</button>
+                        </div>
                     </form>
-                }
-                else
-                {
-                    <div class="text-muted">Bu talep üzerinde işlem yetkiniz yok.</div>
-                }
+                </div>
             </div>
         </div>
-    </div>
+    }
 </div>

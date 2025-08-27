@@ -1,33 +1,88 @@
-﻿@model KEPSAS.TTS.Models.Talep
+﻿@model KEPSAS.TTS.ViewModels.TalepCreateViewModel
 @{
-    ViewData["Title"] = "Yeni Talep";
+    ViewData["Title"] = "Talep Oluştur";
 }
 
-<div class="content-card">
-    <div class="content-card-header">Yeni Talep Oluştur</div>
-
-    <form asp-action="Create" method="post">
-        @Html.AntiForgeryToken()
-
-        <div class="form-group">
-            <label>Başlık</label>
-            <input asp-for="Baslik" class="form-control" required />
+<h3>Talep Oluştur</h3>
+<hr />
+<form asp-action="Create" method="post">
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label asp-for="Baslik" class="form-label"></label>
+            <input asp-for="Baslik" class="form-control" />
             <span asp-validation-for="Baslik" class="text-danger"></span>
         </div>
+        <div class="col-md-6">
+            <label asp-for="Tip" class="form-label"></label>
+            <select asp-for="Tip" class="form-select" id="tipSelect">
+                <option value="1">Donanım</option>
+                <option value="2">Yazılım</option>
+                <option value="3">Diğer</option>
+            </select>
+            <span asp-validation-for="Tip" class="text-danger"></span>
+        </div>
 
-        <div class="form-group">
-            <label>Açıklama</label>
-            <textarea asp-for="Aciklama" class="form-control" rows="5" required></textarea>
+        <div class="col-md-6" id="donanimRow" style="display:none;">
+            <label asp-for="DonanimId" class="form-label"></label>
+            <select asp-for="DonanimId" class="form-select" asp-items="Model.Donanimlar">
+                <option value="">(Seçiniz)</option>
+            </select>
+            <span asp-validation-for="DonanimId" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6" id="yazilimRow" style="display:none;">
+            <label asp-for="YazilimAdi" class="form-label"></label>
+            <input list="yazilimList" asp-for="YazilimAdi" class="form-control" />
+            <datalist id="yazilimList">
+                @foreach (var y in Model.YazilimListe)
+                {
+                    <option value="@y"></option>
+                }
+            </datalist>
+            <span asp-validation-for="YazilimAdi" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="HedefKullaniciId" class="form-label"></label>
+            <select asp-for="HedefKullaniciId" class="form-select" asp-items="Model.Kullanicilar">
+                <option value="">(Seçiniz)</option>
+            </select>
+            <span asp-validation-for="HedefKullaniciId" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="HedefSicilNo" class="form-label"></label>
+            <input asp-for="HedefSicilNo" class="form-control" />
+            <span asp-validation-for="HedefSicilNo" class="text-danger"></span>
+            <div class="form-text">Personel tanımlı değilse veya dış kişi ise sicil/kimlik referansı.</div>
+        </div>
+
+        <div class="col-12">
+            <label asp-for="Aciklama" class="form-label"></label>
+            <textarea asp-for="Aciklama" rows="4" class="form-control"></textarea>
             <span asp-validation-for="Aciklama" class="text-danger"></span>
         </div>
 
-        @* Modelinde varsa ekstra alanları burada gösterebilirsin (Kategori vb.) *@
-
-        <button class="btn btn-primary">Gönder</button>
-        <a asp-action="Index" class="btn btn-light">Vazgeç</a>
-    </form>
-</div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Oluştur</button>
+            <a asp-action="Index" class="btn btn-secondary">Vazgeç</a>
+        </div>
+    </div>
+</form>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        const tipSelect = document.getElementById('tipSelect');
+        const donanimRow = document.getElementById('donanimRow');
+        const yazilimRow = document.getElementById('yazilimRow');
+
+        function syncRows() {
+            const v = parseInt(tipSelect.value, 10);
+            donanimRow.style.display = (v === 1) ? '' : 'none';
+            yazilimRow.style.display  = (v === 2) ? '' : 'none';
+        }
+        tipSelect.addEventListener('change', syncRows);
+        syncRows();
+    </script>
 }

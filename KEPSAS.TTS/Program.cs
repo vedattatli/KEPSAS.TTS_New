@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.WebHost.UseUrls("http://0.0.0.0:5148", "https://0.0.0.0:7237");
 
 // ---------------- DB ----------------
 builder.Services.AddDbContext<ApplicationDbContext>(opt =>

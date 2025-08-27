@@ -39,6 +39,23 @@ namespace KEPSAS.TTS.Data
             b.Entity<Talep>().HasIndex(t => t.OlusturmaTarihi);
             b.Entity<Talep>().HasIndex(t => t.AtananKullaniciId);
             b.Entity<Donanim>().ToTable("Donanimlar");
+
+            b.Entity<Talep>()
+   .HasOne(t => t.Donanim)
+   .WithMany()
+   .HasForeignKey(t => t.DonanimId)
+   .OnDelete(DeleteBehavior.SetNull);
+
+            b.Entity<Talep>()
+             .HasOne(t => t.HedefKullanici)
+             .WithMany()
+             .HasForeignKey(t => t.HedefKullaniciId)
+             .OnDelete(DeleteBehavior.SetNull);
+
+            // Indexler (opsiyonel ama önerilir)
+            b.Entity<Talep>().HasIndex(t => t.Tip);
+            b.Entity<Talep>().HasIndex(t => t.DonanimId);
+            b.Entity<Talep>().HasIndex(t => t.HedefKullaniciId);
         }
     }
 }

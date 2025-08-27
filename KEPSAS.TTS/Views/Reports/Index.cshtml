@@ -1,37 +1,197 @@
-﻿@model IEnumerable<dynamic>
+﻿@model KEPSAS.TTS.ViewModels.ReportsDashboardVm
 @{
     ViewData["Title"] = "Raporlar";
-    var toplam = (int)(ViewBag.Toplam ?? 0);
-	var rq = ViewContext.HttpContext.Request;   
+    var users = ViewBag.Users as List<KeyValuePair<string, string>> ?? new();
+    var durumlar = ViewBag.Durumlar as List<string> ?? new();
+    string qs(string k, string? v)
+    {
+        var dict = new Dictionary<string, string?>
+        {
+            ["from"] = Model.Filters.From?.ToString("yyyy-MM-dd"),
+            ["to"] = Model.Filters.To?.ToString("yyyy-MM-dd"),
+            ["creatorId"] = Model.Filters.CreatorId,
+            ["assigneeId"] = Model.Filters.AssigneeId,
+            ["durum"] = Model.Filters.Durum
+        };
+        dict[k] = v;
+        var q = string.Join("&", dict.Where(p => !string.IsNullOrWhiteSpace(p.Value))
+                                     .Select(p => $"{p.Key}={Uri.EscapeDataString(p.Value!)}"));
+        return "?" + q;
+    }
 }
-<div class="content-card">
-    <div class="content-card-header d-flex justify-content-between align-items-center">
-        <div>Talep Raporları</div>
-        <a class="btn btn-outline-primary"
-           href="@Url.Action("ExportCsv", "Reports", new { from = rq.Query["from"], to = rq.Query["to"] })">
-            CSV Al
-        </a>
-    </div>
 
-    <form method="get" class="p-3 border-bottom">
-        <div class="form-row">
-            <div class="col-md-3"><input type="date" name="from" value="@rq.Query["from"]" class="form-control" /></div>
-            <div class="col-md-3"><input type="date" name="to" value="@rq.Query["to"]" class="form-control" /></div>
-            <div class="col-md-2"><button class="btn btn-outline-secondary btn-block">Uygula</button></div>
-            <div class="col-md-4 text-right align-self-center"><strong>Toplam:</strong> @toplam</div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@picocss/pico@2/css/pico.min.css" />
+<div class="container">
+    <h2>Raporlar</h2>
+
+    <!-- Filtre Formu -->
+    <form method="get" class="grid" style="grid-template-columns: repeat(6, 1fr); gap: 1rem;">
+        <div>
+            <label>Başlangıç</label>
+            <input type="date" name="from" value="@(Model.Filters.From?.ToString("yyyy-MM-dd"))" />
+        </div>
+        <div>
+            <label>Bitiş</label>
+            <input type="date" name="to" value="@(Model.Filters.To?.ToString("yyyy-MM-dd"))" />
+        </div>
+        <div>
+            <label>Oluşturan</label>
+            <select name="creatorId">
+                <option value="">(Hepsi)</option>
+                @foreach (var u in users)
+                {
+                    <option value="@u.Key" selected="@(Model.Filters.CreatorId == u.Key)">
+                        @u.Value
+                    </option>
+                }
+            </select>
+        </div>
+        <div>
+            <label>Atanan</label>
+            <select name="assigneeId">
+                <option value="">(Hepsi)</option>
+                @foreach (var u in users)
+                {
+                    <option value="@u.Key" selected="@(Model.Filters.AssigneeId == u.Key)">
+                        @u.Value
+                    </option>
+                }
+            </select>
+        </div>
+        <div>
+            <label>Durum</label>
+            <select name="durum">
+                <option value="">(Hepsi)</option>
+                @foreach (var d in durumlar)
+                {
+                    <option value="@d" selected="@(Model.Filters.Durum == d)">@d</option>
+                }
+            </select>
+        </div>
+        <div style="display:flex;align-items:flex-end;gap:.5rem;">
+            <button type="submit">Uygula</button>
+            <a class="secondary outline" href="@Url.Action("Index", "Reports")">Temizle</a>
         </div>
     </form>
 
-    <table class="table content-table mb-0">
-        <thead><tr><th>Durum</th><th class="text-right">Adet</th></tr></thead>
-        <tbody>
-            @foreach (var x in Model)
-            {
-                <tr>
-                    <td>@x.Durum</td>
-                    <td class="text-right">@x.Adet</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <!-- Özet Kartlar -->
+    <div class="grid" style="grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top:1rem;">
+        <article>
+            <header>Toplam Talep</header>
+            <strong style="font-size:2rem">@Model.Toplam</strong>
+        </article>
+        <article>
+            <header>Açık Talep</header>
+            <strong style="font-size:2rem">@Model.Acik</strong>
+        </article>
+        <article>
+            <header>Kapanan</header>
+            <strong style="font-size:2rem">@Model.Kapanan</strong>
+        </article>
+        <article>
+            <header>MTTR (saat)</header>
+            <strong style="font-size:2rem">@((Model.MTTR_Saat?.ToString("0.0")) ?? "-")</strong>
+        </article>
+    </div>
+
+    <!-- Grafikleri yan yana -->
+    <div class="grid" style="grid-template-columns: 1.2fr 1.8fr; gap: 1rem; margin-top:1rem;">
+        <article>
+            <header>Durum Dağılımı</header>
+            <canvas id="durumChart" height="240"></canvas>
+        </article>
+        <article>
+            <header>Günlük Trend (Açılan / Kapanan / Backlog)</header>
+            <canvas id="trendChart" height="240"></canvas>
+        </article>
+    </div>
+
+    <!-- Yaş Dağılımı + CSV -->
+    <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 1rem; margin-top:1rem;">
+        <article>
+            <header>Açık Taleplerin Yaş Dağılımı</header>
+            <canvas id="agingChart" height="240"></canvas>
+        </article>
+        <article>
+            <header>İndir</header>
+            <p>Filtrelere göre satır detaylarını CSV olarak dışa aktar.</p>
+            <a class="contrast" href="@Url.Action("ExportCsv", "Reports")@qs("", null)">CSV indir</a>
+        </article>
+    </div>
+
+    <!-- Top listeler -->
+    <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 1rem; margin-top:1rem;">
+        <article>
+            <header>En Çok Talep Açanlar (Top 10)</header>
+            <table>
+                <thead><tr><th>Kullanıcı</th><th>Adet</th></tr></thead>
+                <tbody>
+                    @foreach (var r in Model.EnCokTalepAcanlar)
+                    {
+                        <tr><td>@r.Ad</td><td>@r.Adet</td></tr>
+                    }
+                </tbody>
+            </table>
+        </article>
+        <article>
+            <header>En Çok Atananlar (Top 10)</header>
+            <table>
+                <thead><tr><th>Kullanıcı</th><th>Adet</th></tr></thead>
+                <tbody>
+                    @foreach (var r in Model.EnCokAtananlar)
+                    {
+                        <tr><td>@r.Ad</td><td>@r.Adet</td></tr>
+                    }
+                </tbody>
+            </table>
+        </article>
+    </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Durum dağılımı
+    const durumLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DurumDagilimi.Select(x => x.Durum)));
+    const durumData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DurumDagilimi.Select(x => x.Adet)));
+
+    new Chart(document.getElementById('durumChart'), {
+        type: 'doughnut',
+        data: { labels: durumLabels, datasets: [{ data: durumData }] },
+        options: { plugins: { legend: { position: 'bottom' } } }
+    });
+
+    // Günlük trend
+    const trendLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.GunlukTrend.Select(x => x.Tarih.ToString("yyyy-MM-dd"))));
+    const trendYeni = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.GunlukTrend.Select(x => x.Yeni)));
+    const trendKapanan = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.GunlukTrend.Select(x => x.Kapanan)));
+    const trendBacklog = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.GunlukTrend.Select(x => x.Backlog)));
+
+    new Chart(document.getElementById('trendChart'), {
+        type: 'line',
+        data: {
+            labels: trendLabels,
+            datasets: [
+                { label: 'Açılan', data: trendYeni, tension: .3 },
+                { label: 'Kapanan', data: trendKapanan, tension: .3 },
+                { label: 'Backlog', data: trendBacklog, tension: .3 }
+            ]
+        },
+        options: {
+            plugins: { legend: { position: 'bottom' } },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+
+    // Yaş dağılımı
+    const agingLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.YasDagilimi.Select(x => x.Aralik)));
+    const agingData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.YasDagilimi.Select(x => x.Adet)));
+
+    new Chart(document.getElementById('agingChart'), {
+        type: 'bar',
+        data: { labels: agingLabels, datasets: [{ data: agingData }] },
+        options: {
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+</script>
