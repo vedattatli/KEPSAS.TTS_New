@@ -1,0 +1,62 @@
+﻿@model KEPSAS.TTS.ViewModels.CreateUserVm
+@{
+    ViewData["Title"] = "Yeni Kullanıcı";
+}
+
+<div class="content-card">
+    <div class="content-card-header d-flex justify-content-between align-items-center">
+        <div>Yeni Kullanıcı</div>
+        <a asp-action="Index" class="btn btn-sm btn-light">Listeye Dön</a>
+    </div>
+    <div class="p-3">
+        <form asp-action="Create" method="post" class="row">
+            @Html.AntiForgeryToken()
+
+            <div class="form-group col-md-6">
+                <label>Kullanıcı Adı</label>
+                <input asp-for="UserName" class="form-control" />
+                <span class="text-danger" asp-validation-for="UserName"></span>
+            </div>
+
+            <div class="form-group col-md-6">
+                <label>E-posta</label>
+                <input asp-for="Email" class="form-control" />
+                <span class="text-danger" asp-validation-for="Email"></span>
+            </div>
+
+            <div class="form-group col-md-6">
+                <label>Parola</label>
+                <input asp-for="Password" class="form-control" />
+                <small class="form-text text-muted">En az 6 karakter olmalıdır.</small>
+                <span class="text-danger" asp-validation-for="Password"></span>
+            </div>
+
+            <div class="form-group col-md-6">
+                <label>Rol</label>
+                <select asp-for="Role" class="form-control">
+                    <option value="User">User</option>
+                    <option value="Admin">Admin</option>
+                </select>
+                <span class="text-danger" asp-validation-for="Role"></span>
+            </div>
+
+            <div class="form-group col-md-6">
+                <label>Ad</label>
+                <input asp-for="Ad" class="form-control" />
+            </div>
+            <div class="form-group col-md-6">
+                <label>Soyad</label>
+                <input asp-for="Soyad" class="form-control" />
+            </div>
+
+            <div class="col-12 mt-2">
+                <button class="btn btn-primary">Oluştur</button>
+                <a asp-action="Index" class="btn btn-light">İptal</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

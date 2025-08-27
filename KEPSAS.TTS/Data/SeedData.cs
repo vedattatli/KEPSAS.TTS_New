@@ -31,6 +31,25 @@ namespace KEPSAS.TTS.Data
 
             if (!await userMgr.IsInRoleAsync(admin, "Admin"))
                 await userMgr.AddToRoleAsync(admin, "Admin");
+            // USER rolü garanti
+            if (!await roleMgr.RoleExistsAsync("User"))
+                await roleMgr.CreateAsync(new IdentityRole("User"));
+
+            // test standart kullanıcı
+            var demoUser = await userMgr.FindByNameAsync("demo");
+            if (demoUser == null)
+            {
+                demoUser = new ApplicationUser
+                {
+                    UserName = "demo",
+                    Email = "demo@kepsas.com",
+                    EmailConfirmed = true
+                };
+                await userMgr.CreateAsync(demoUser, "Demo.1234");
+                await userMgr.AddToRoleAsync(demoUser, "User");
+            }
+
         }
+
     }
 }

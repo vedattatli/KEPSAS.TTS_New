@@ -67,5 +67,56 @@ namespace KEPSAS.TTS.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public IActionResult Create()
+        {
+            return View(new CreateUserVm { Role = "User" });
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(CreateUserVm vm)
+        {
+            if (!ModelState.IsValid)
+                return View(vm);
+
+            // Role var mı, yoksa oluştur
+            if (!await _roleManager.RoleExistsAsync("Admin"))
+                await _roleManager.CreateAsync(new IdentityRole("Admin"));
+            if (!await _roleManager.RoleExistsAsync("User"))
+                await _roleManager.CreateAsync(new IdentityRole("User"));
+
+            var user = new ApplicationUser
+            {
+                UserName = vm.UserName,
+                Email = vm.Email,
+                EmailConfirmed = true,   // e-posta onayıyla uğraşmayalım
+                Ad = vm.Ad,
+                Soyad = vm.Soyad
+            };
+
+            var createResult = await _userManager.CreateAsync(user, vm.Password);
+            if (!createResult.Succeeded)
+            {
+                foreach (var err in createResult.Errors)
+                    ModelState.AddModelError(string.Empty, $"{err.Code}: {err.Description}");
+                return View(vm);
+            }
+
+            // Rol ata
+            var roleToAssign = (vm.Role == "Admin") ? "Admin" : "User";
+            var roleResult = await _userManager.AddToRoleAsync(user, roleToAssign);
+            if (!roleResult.Succeeded)
+            {
+                foreach (var err in roleResult.Errors)
+                    ModelState.AddModelError(string.Empty, $"{err.Code}: {err.Description}");
+                // kullanıcı oluştu ama rol atanamadı → istersen silersin; ben ekranda göstermekle yetindim
+                return View(vm);
+            }
+
+            TempData["Ok"] = $"Kullanıcı oluşturuldu: {vm.UserName} ({roleToAssign})";
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

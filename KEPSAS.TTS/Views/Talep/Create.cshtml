@@ -1,15 +1,33 @@
 ﻿@model KEPSAS.TTS.Models.Talep
 @{
-	ViewData["Title"] = "Yeni Talep";
+    ViewData["Title"] = "Yeni Talep";
 }
-<div class="card">
-	<div class="card-body">
-		<form asp-action="Create" method="post">
-			@Html.AntiForgeryToken()
-			<div class="form-group"><label>Başlık</label><input asp-for="Baslik" class="form-control" /></div>
-			<div class="form-group"><label>Açıklama</label><textarea asp-for="Aciklama" class="form-control"></textarea></div>
-			<button class="btn btn-primary">Kaydet</button>
-			<a class="btn btn-link" href="@Url.Action("Index")">İptal</a>
-		</form>
-	</div>
+
+<div class="content-card">
+    <div class="content-card-header">Yeni Talep Oluştur</div>
+
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="form-group">
+            <label>Başlık</label>
+            <input asp-for="Baslik" class="form-control" required />
+            <span asp-validation-for="Baslik" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label>Açıklama</label>
+            <textarea asp-for="Aciklama" class="form-control" rows="5" required></textarea>
+            <span asp-validation-for="Aciklama" class="text-danger"></span>
+        </div>
+
+        @* Modelinde varsa ekstra alanları burada gösterebilirsin (Kategori vb.) *@
+
+        <button class="btn btn-primary">Gönder</button>
+        <a asp-action="Index" class="btn btn-light">Vazgeç</a>
+    </form>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

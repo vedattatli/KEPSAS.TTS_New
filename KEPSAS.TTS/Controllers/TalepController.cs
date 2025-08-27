@@ -1,105 +1,140 @@
 ﻿using KEPSAS.TTS.Data;
 using KEPSAS.TTS.Models;
-using KEPSAS.TTS.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using System.Threading.Tasks;
 
-[Authorize]
-public class TalepController : Controller
+namespace KEPSAS.TTS.Controllers
 {
-    
-    private readonly ApplicationDbContext _context;
-    private readonly UserManager<ApplicationUser> _userManager;
-
-    public TalepController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+    [Authorize]
+    public class TalepController : Controller
     {
-        _context = context;
-        _userManager = userManager;
-    }
+        private readonly ApplicationDbContext _db;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-    // Index ve diğer temel metotlarınızı buraya ekleyebilirsiniz.
-    // Örnek Index metodu:
-    public async Task<IActionResult> Index()
-    {
-        var talepler = await _context.Talepler.ToListAsync();
-        // Bu talepleri bir ViewModel'e dönüştürüp View'e göndermeniz en doğrusu olacaktır.
-        return View(talepler);
-    }
-
-
-    public async Task<IActionResult> Details(int id)
-    {
-        var talep = await _context.Talepler.FindAsync(id);
-
-        if (talep == null)
+        public TalepController(ApplicationDbContext db, UserManager<ApplicationUser> userManager)
         {
-            return NotFound();
+            _db = db;
+            _userManager = userManager;
+        }
+        // Raporlar: Kullanıcı kendi tüm geçmiş taleplerini görür (Tamamlananlar dahil)
+        [Authorize(Roles = "User")]
+        public async Task<IActionResult> Raporlar()
+        {
+            var meId = _userManager.GetUserId(User);
+
+            // Kendi tüm taleplerini, tamamlananlar da dahil
+            var list = await _db.Talepler
+                .Include(t => t.OlusturanKullanici)
+                .Include(t => t.AtananKullanici)
+                .Where(t => t.OlusturanKullaniciId == meId)
+                .OrderByDescending(t => t.OlusturmaTarihi)
+                .ToListAsync();
+
+            return View(list);
+        }
+        // Liste: Admin tüm talepleri görür; normal kullanıcı sadece kendi açtıklarını görür
+        public async Task<IActionResult> Index(string? q)
+        {
+            var meId = _userManager.GetUserId(User);
+
+            IQueryable<Talep> baseQ = _db.Talepler
+                .Include(t => t.OlusturanKullanici)  // <-- DÜZELTİLDİ
+                .Include(t => t.AtananKullanici)     // <-- DÜZELTİLDİ
+                .AsNoTracking();
+
+            if (!User.IsInRole("Admin"))
+                baseQ = baseQ.Where(t => t.OlusturanKullaniciId == meId);
+
+            if (!string.IsNullOrWhiteSpace(q))
+                baseQ = baseQ.Where(t => t.Baslik.Contains(q) || (t.Aciklama ?? "").Contains(q));
+
+            // Tamamlananları normal listeden düş
+            baseQ = baseQ.Where(t => (t.Durum ?? "") != "Tamamlandı");
+
+            var list = await baseQ.OrderByDescending(t => t.OlusturmaTarihi).ToListAsync();
+            return View(list);
         }
 
-        // Kullanıcıyı, talebin içindeki 'OlusturanKullaniciId' ile ayrı olarak buluyoruz.
-        // Bu alanın Talep modelinizde string tipinde olduğundan emin olun.
-        var olusturanKullanici = await _userManager.FindByIdAsync(talep.OlusturanKullaniciId);
-
-        var model = new TalepDetayViewModel
+        // Detay: normal kullanıcı sadece kendi talebini görebilir; Admin herkesi
+        public async Task<IActionResult> Details(int id)
         {
-            Id = talep.Id,
-            Baslik = talep.Baslik,
-            Aciklama = talep.Aciklama,
-            OlusturanKullanici = olusturanKullanici?.UserName
-        };
+            var talep = await _db.Talepler
+                .Include(t => t.OlusturanKullanici)  // <-- DÜZELTİLDİ
+                .Include(t => t.AtananKullanici)     // <-- DÜZELTİLDİ
+                .FirstOrDefaultAsync(t => t.Id == id);
 
-        return View(model);
-    }
+            if (talep == null) return NotFound();
 
-    [HttpGet]
-    public async Task<IActionResult> Yonlendir(int id)
-    {
-        var kullanicilar = await _userManager.Users
-                                             .Select(u => new SelectListItem
-                                             {
-                                                 Value = u.Id.ToString(),
-                                                 Text = u.UserName
-                                             })
-                                             .ToListAsync();
+            var meId = _userManager.GetUserId(User);
+            if (!User.IsInRole("Admin") && talep.OlusturanKullaniciId != meId)
+                return Forbid();
 
-        var model = new TalepYonlendirViewModel
-        {
-            TalepId = id,
-            KullanicilarListesi = kullanicilar
-        };
-
-        return PartialView("_TalepYonlendirPartial", model);
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Yonlendir(TalepYonlendirViewModel model)
-    {
-        if (ModelState.IsValid)
-        {
-            var talep = await _context.Talepler.FindAsync(model.TalepId);
-            if (talep == null)
+            // Sadece admin atama/durum yönetebilir → atanabilir kullanıcılar listesi
+            if (User.IsInRole("Admin"))
             {
-                return NotFound();
+                ViewBag.AssignableUsers = await _userManager.Users
+                    .OrderBy(u => u.UserName)
+                    .Select(u => new SelectListItem { Value = u.Id, Text = u.UserName! })
+                    .ToListAsync();
             }
 
-            // Talep modelinizdeki 'AtananKullaniciId' alanını güncelliyoruz.
-            // Bu alanın Talep modelinizde string? (nullable string) tipinde olduğundan emin olun.
-            talep.AtananKullaniciId = model.AtanacakKullaniciId;
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction("Details", new { id = model.TalepId });
+            return View(talep);
         }
 
-        // Model geçerli değilse, kullanıcı listesini tekrar doldurup partial view'i döndürürüz.
-        model.KullanicilarListesi = await _userManager.Users
-                                             .Select(u => new SelectListItem { Value = u.Id.ToString(), Text = u.UserName })
-                                             .ToListAsync();
-        return PartialView("_TalepYonlendirPartial", model);
+        [HttpGet]
+        public IActionResult Create() => View();
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Talep model)
+        {
+            if (!ModelState.IsValid) return View(model);
+
+            var meId = _userManager.GetUserId(User);
+            model.OlusturanKullaniciId = meId;
+            model.OlusturmaTarihi = DateTime.UtcNow;
+            model.SonIslemTarihi = DateTime.UtcNow;
+            model.Durum = "Yeni";
+            model.AtananKullaniciId = null;   // kullanıcı atama yapamaz
+
+            _db.Talepler.Add(model);
+            await _db.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Talebiniz oluşturuldu.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> Assign(int id, string? userId)
+        {
+            var talep = await _db.Talepler.FindAsync(id);
+            if (talep == null) return NotFound();
+
+            talep.AtananKullaniciId = string.IsNullOrWhiteSpace(userId) ? null : userId;
+            talep.Durum = string.IsNullOrWhiteSpace(userId) ? "Yeni" : "Üzerimde";
+            talep.SonIslemTarihi = DateTime.UtcNow;
+
+            await _db.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Atama güncellendi.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> SetStatus(int id, string durum)
+        {
+            var talep = await _db.Talepler.FindAsync(id);
+            if (talep == null) return NotFound();
+
+            talep.Durum = durum;
+            talep.SonIslemTarihi = DateTime.UtcNow;
+
+            await _db.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Talep durumu güncellendi.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
     }
 }

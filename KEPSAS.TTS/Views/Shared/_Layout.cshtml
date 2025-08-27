@@ -25,7 +25,7 @@
         <!-- Sol Dikey Menü -->
         <aside class="sidebar">
             <div class="sidebar-header">
-                <span class="logo">TTS</span>
+                <span class="logo">TTS</span>   
                 <span class="logo-text">Talep Takip</span>
             </div>
             <nav class="sidebar-nav">
@@ -39,6 +39,7 @@
                     <i class="fa-solid fa-layer-group"></i>
                     <span>Taleplerim</span>
                 </a>
+                
                 <a href="@Url.Action("Create", "Talep")" class="nav-item">
                     <i class="fa-solid fa-plus"></i>
                     <span>Yeni Talep</span>
@@ -66,7 +67,25 @@
                         <span>Kullanıcı Yönetimi</span>
                     </a>
                 }
+                @if (User.IsInRole("User"))
+{
+    <a href="@Url.Action("Raporlar","Talep")" class="nav-item">
+        <i class="fa-solid fa-file-lines"></i>
+        <span>Taleplerim (Rapor)</span>
+    </a>
+}
+
             </nav>
+            <a href="@Url.Action("Index", "Reports")" class="nav-item">
+                <i class="fa-solid fa-chart-pie"></i>
+                <span>Raporlar</span>
+            </a>
+
+            <a href="@Url.Action("Index", "Me")" class="nav-item">
+                <i class="fa-solid fa-user-gear"></i>
+                <span>Ayarlar</span>
+            </a>
+
             <div class="sidebar-footer">
                 <form asp-controller="Account" asp-action="Logout" method="post">
                     @Html.AntiForgeryToken()

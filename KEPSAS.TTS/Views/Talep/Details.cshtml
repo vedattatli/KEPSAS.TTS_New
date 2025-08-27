@@ -1,67 +1,61 @@
-﻿@model KEPSAS.TTS.ViewModels.TalepDetayViewModel
+﻿@model KEPSAS.TTS.Models.Talep
+@using KEPSAS.TTS.Data
 @{
     ViewData["Title"] = $"Talep Detayı: #{Model.Id}";
+    bool isAdmin = User.IsInRole("Admin");
 }
 
 <div class="row">
-    <!-- Sol Sütun: Talep Bilgileri ve Aksiyonlar -->
-    <div class="col-lg-7">
+    <div class="col-lg-8">
         <div class="content-card">
-            <div class="content-card-header d-flex justify-content-between align-items-center">
-                <span>@Model.Baslik</span>
-                <span class="status-badge @Model.Durum.ToLower()">@Model.Durum</span>
+            <div class="content-card-header">Talep Bilgileri</div>
+            <div class="p-3">
+                <div class="mb-2"><strong>Başlık:</strong> @Model.Baslik</div>
+                <div class="mb-2"><strong>Durum:</strong> @Model.Durum</div>
+                <div class="mb-2"><strong>Oluşturan:</strong> @(Model.OlusturanKullaniciId ?? "-")</div>
+                <div class="mb-2"><strong>Oluşturan:</strong> @(Model.OlusturanKullaniciId ?? "-")</div>
+                <hr />
+                <div>@(Model.Aciklama ?? "-")</div>
             </div>
-            <div class="card-body">
-                <p class="text-muted">@Model.Aciklama</p>
-                <hr>
-                <div class="row">
-                    <div class="col-sm-6">
-                        <strong>Oluşturan:</strong> @Model.OlusturanKullanici <br>
-                        <strong>Oluşturma Tarihi:</strong> @Model.OlusturmaTarihi.ToString("dd.MM.yyyy HH:mm")
-                    </div>
-                    <div class="col-sm-6">
-                        <strong>Atanan Kişi:</strong> @Model.AtananKullanici <br>
-                        <strong>Öncelik:</strong> @Model.Oncelik
-                    </div>
-                </div>
-            </div>
-            @if (User.IsInRole("Admin"))
-            {
-                <div class="card-footer bg-light">
-                    <h6 class="mb-3">Yönetici Aksiyonları</h6>
-                    <button class="btn btn-success btn-sm"><i class="fa-solid fa-check mr-1"></i> Tamamlandı Olarak İşaretle</button>
-                    <button class="btn btn-info btn-sm"
-                            data-modal-url="@Url.Action("Yonlendir", "Talep", new { id = Model.Id })">
-                        <i class="fa-solid fa-random mr-1"></i> Başka Birine Yönlendir
-                    </button>
-                    <button class="btn btn-danger btn-sm"><i class="fa-solid fa-times mr-1"></i> Talebi İptal Et</button>
-                </div>
-            }
         </div>
     </div>
 
-    <!-- Sağ Sütun: Talep Geçmişi (Timeline) -->
-    <div class="col-lg-5">
+    <div class="col-lg-4">
         <div class="content-card">
-            <div class="content-card-header">
-                Talep Hareket Geçmişi
-            </div>
-            <div class="card-body">
-                <ul class="timeline">
-                    @foreach (var hareket in Model.HareketGecmisi.OrderByDescending(h => h.Tarih))
-                    {
-                        <li>
-                            <i class="@hareket.Ikon @hareket.Renk"></i>
-                            <div class="timeline-item">
-                                <span class="time"><i class="fa-regular fa-clock"></i> @hareket.Tarih.ToString("dd.MM.yyyy HH:mm")</span>
-                                <h3 class="timeline-header"><strong>@hareket.IslemYapan</strong></h3>
-                                <div class="timeline-body">
-                                    @hareket.Aciklama
-                                </div>
-                            </div>
-                        </li>
-                    }
-                </ul>
+            <div class="content-card-header">İşlemler</div>
+            <div class="p-3">
+                @if (isAdmin)
+                {
+                    <!-- Atama -->
+                    <form asp-action="Assign" method="post" class="mb-3">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <label>Atanacak Kullanıcı</label>
+                        <select name="userId" class="form-control">
+                            <option value="">(Atama kaldır)</option>
+                            @foreach (var u in ViewBag.AssignableUsers as IEnumerable<SelectListItem> ?? Enumerable.Empty<SelectListItem>())
+                            {
+                                <option value="@u.Value" selected="@(Model.AtananKullaniciId == u.Value)">
+                                    @u.Text
+                                </option>
+                            }
+                        </select>
+                        <button class="btn btn-sm btn-outline-primary mt-2">Kaydet</button>
+                    </form>
+
+                    <!-- Hızlı Durum -->
+                    <form asp-action="SetStatus" method="post" class="d-flex flex-wrap gap-2">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <button name="durum" value="Üzerimde" class="btn btn-sm btn-info mr-2">Üzerimde</button>
+                        <button name="durum" value="Bekliyor" class="btn btn-sm btn-warning mr-2">Bekliyor</button>
+                        <button name="durum" value="Tamamlandı" class="btn btn-sm btn-success">Tamamlandı</button>
+                    </form>
+                }
+                else
+                {
+                    <div class="text-muted">Bu talep üzerinde işlem yetkiniz yok.</div>
+                }
             </div>
         </div>
     </div>

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 
 // Projenizin ad alanına göre güncelleyin
-namespace TalepTakipSistemi.ViewModels
+namespace KEPSAS.TTS.ViewModels
 {
     // Listede gösterilecek tek bir donanımın modeli
     public class DonanimOzetViewModel

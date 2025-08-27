@@ -5,90 +5,244 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace KEPSAS.TTS.Controllers
 {
-    [Authorize] // Bu controller'a sadece giriş yapmış kullanıcılar erişebilir.
+    [Authorize]
     public class DonanimController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext _db;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        // Constructor: Gerekli servisleri (veritabanı ve kullanıcı yönetimi) enjekte ediyoruz.
-        public DonanimController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        // Genişletilmiş kategori/durum kaynakları (veritabanıyla birleştiriyoruz)
+        private static readonly List<string> _kategoriKaynak = new()
         {
-            _context = context;
-            _userManager = userManager;
+            "Bilgisayar","Dizüstü","Masaüstü","All in One","Sunucu","Yazıcı","Tarayıcı",
+            "Ağ Cihazı (Switch)","Ağ Cihazı (Router)","Erişim Noktası (AP)","Firewall",
+            "Telefon","IP Telefon","Tablet","Ekran/Monitör","Projeksiyon","UPS",
+            "Depolama (NAS)","Harici Disk","Kamera","Yazılım Lisansı",
+            "Aksesuar (Klavye)","Aksesuar (Mouse)","Aksesuar (Kulaklık)","Dock/Hub",
+            "Kablolama","Diğer"
+        };
+
+        private static readonly List<string> _durumKaynak = new()
+        {
+            "Stokta","Kullanımda","Boşta","Arızalı","Hurda"
+        };
+
+        public DonanimController(ApplicationDbContext db, UserManager<ApplicationUser> um)
+        {
+            _db = db;
+            _userManager = um;
         }
 
-        // Adminler için Envanter Listesi (Tüm Donanımlar)
+        // ENVANTER YÖNETİMİ (Admin)
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? q, string? kategori, string? durum)
         {
-            // İlişkili kullanıcı verisini de (AtananKullanici.UserName) verimli bir şekilde çekmek için .Include() kullanıyoruz.
-            // AsNoTracking() sorguyu hızlandırır çünkü veriler sadece okunacaktır.
-            var donanimlar = await _context.Donanimlar
-                                           .Include(d => d.AtananKullanici)
-                                           .AsNoTracking()
-                                           .OrderBy(d => d.Kategori)
-                                           .ThenBy(d => d.Model)
-                                           .ToListAsync();
-            return View(donanimlar);
+            var query = _db.Donanimlar
+                .Include(x => x.AtananKullanici)
+                .AsNoTracking()
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(q))
+                query = query.Where(x =>
+                    (x.SeriNo ?? "").Contains(q) ||
+                    (x.Model ?? "").Contains(q));
+
+            if (!string.IsNullOrWhiteSpace(kategori))
+                query = query.Where(x => x.Kategori == kategori);
+
+            if (!string.IsNullOrWhiteSpace(durum))
+                query = query.Where(x => x.Durum == durum);
+
+            var list = await query
+                .OrderBy(x => x.Kategori)
+                .ThenBy(x => x.Model)
+                .ToListAsync();
+
+            // Filtre drop-down’ları: statik + veritabanındaki farklı değerler
+            var dbKategoriler = await _db.Donanimlar
+                .Select(x => x.Kategori!)
+                .Where(x => x != null && x != "")
+                .Distinct()
+                .ToListAsync();
+
+            ViewBag.Kategoriler = _kategoriKaynak
+                .Union(dbKategoriler)
+                .OrderBy(x => x)
+                .ToList();
+
+            ViewBag.Durumlar = _durumKaynak;
+
+            return View(list);
         }
 
-        // Standart kullanıcılar için "Donanımlarım" sayfası
+        // KULLANICININ KENDİ DONANIMLARI
         public async Task<IActionResult> Kullandiklarim()
         {
-            // O an giriş yapmış olan kullanıcının kimliğini (ID) alıyoruz.
             var currentUserId = _userManager.GetUserId(User);
+            var list = await _db.Donanimlar
+                .AsNoTracking()
+                .Where(d => d.AtananKullaniciId == currentUserId) // gerçekten bana atanmış olanlar
+                .OrderBy(d => d.Model)
+                .ToListAsync();
 
-            // Veritabanından sadece bu kullanıcıya atanmış donanımları çekiyoruz.
-            var kullaniciDonanimlari = await _context.Donanimlar
-                                                     .Where(d => d.AtananKullaniciId == currentUserId)
-                                                     .AsNoTracking()
-                                                     .ToListAsync();
-
-            return View(kullaniciDonanimlari);
+            return View(list);
         }
 
-        // Adminler için "Yeni Donanım Ekle" formunu gösterir.
+        // YENİ DONANIM FORMU
         [Authorize(Roles = "Admin")]
         [HttpGet]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            return View();
+            // DB’deki kategorilerle birleştir
+            var dbKategoriler = await _db.Donanimlar
+                .Select(x => x.Kategori!)
+                .Where(x => x != null && x != "")
+                .Distinct()
+                .ToListAsync();
+
+            var vm = new DonanimEkleViewModel
+            {
+                Durum = "Boşta",
+                Kategoriler = _kategoriKaynak.Union(dbKategoriler).OrderBy(x => x).ToList(),
+                Durumlar = _durumKaynak,
+                KullaniciSecenekleri = await _userManager.Users
+                    .OrderBy(x => x.UserName)
+                    .Select(u => new KeyValuePair<string, string>(u.Id, u.UserName ?? u.Email ?? u.Id))
+                    .ToListAsync()
+            };
+            return View(vm);
         }
 
-        // "Yeni Donanım Ekle" formundan gelen veriyi işler ve veritabanına kaydeder.
+        // YENİ DONANIM KAYDI
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(DonanimEkleViewModel model)
+        public async Task<IActionResult> Create(DonanimEkleViewModel vm)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var yeniDonanim = new Donanim
-                {
-                    SeriNo = model.SeriNo,
-                    Model = model.Model,
-                    Kategori = model.Kategori,
-                    AlinmaTarihi = model.AlinmaTarihi,
-                    Durum = "Stokta" // Yeni eklenen her donanım başlangıçta stoktadır.
-                };
+                // listeleri yeniden yükle
+                var dbKategoriler = await _db.Donanimlar
+                    .Select(x => x.Kategori!)
+                    .Where(x => x != null && x != "")
+                    .Distinct()
+                    .ToListAsync();
 
-                _context.Donanimlar.Add(yeniDonanim);
-                await _context.SaveChangesAsync();
+                vm.Kategoriler = _kategoriKaynak.Union(dbKategoriler).OrderBy(x => x).ToList();
+                vm.Durumlar = _durumKaynak;
+                vm.KullaniciSecenekleri = await _userManager.Users
+                    .OrderBy(x => x.UserName)
+                    .Select(u => new KeyValuePair<string, string>(u.Id, u.UserName ?? u.Email ?? u.Id))
+                    .ToListAsync();
 
-                // Başarılı işlem sonrası kullanıcıya geri bildirim vermek için TempData kullanıyoruz.
-                TempData["SuccessMessage"] = $"'{yeniDonanim.Model}' modeli başarıyla envantere eklendi.";
-
-                return RedirectToAction("Index");
+                return View(vm);
             }
 
-            // Model geçerli değilse, formu hatalarla birlikte tekrar göster.
-            return View(model);
+            var entity = new Donanim
+            {
+                SeriNo = vm.SeriNo.Trim(),
+                Model = vm.Model.Trim(),
+                Kategori = vm.Kategori?.Trim(),
+                AlinmaTarihi = vm.AlinmaTarihi,
+                AtananKullaniciId = string.IsNullOrWhiteSpace(vm.AtanacakKullaniciId) ? null : vm.AtanacakKullaniciId,
+                Durum = string.IsNullOrWhiteSpace(vm.AtanacakKullaniciId)
+                            ? (vm.Durum ?? "Boşta")
+                            : "Kullanımda"
+            };
+
+            _db.Donanimlar.Add(entity);
+            await _db.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Donanım envantere eklendi.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        // DÜZENLE – GET
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var d = await _db.Donanimlar
+                .Include(x => x.AtananKullanici)
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (d == null) return NotFound();
+
+            var dbKategoriler = await _db.Donanimlar
+                .Select(x => x.Kategori!)
+                .Where(x => x != null && x != "")
+                .Distinct()
+                .ToListAsync();
+
+            var vm = new DonanimDuzenleViewModel
+            {
+                Id = d.Id,
+                SeriNo = d.SeriNo ?? string.Empty,
+                Model = d.Model ?? string.Empty,
+                Kategori = d.Kategori,
+                AlinmaTarihi = d.AlinmaTarihi,
+                AtanacakKullaniciId = d.AtananKullaniciId,
+                Durum = d.Durum ?? "Boşta",
+                Kategoriler = _kategoriKaynak.Union(dbKategoriler).OrderBy(x => x).ToList(),
+                Durumlar = _durumKaynak,
+                KullaniciSecenekleri = await _userManager.Users
+                    .OrderBy(u => u.UserName)
+                    .Select(u => new KeyValuePair<string, string>(u.Id, u.UserName ?? u.Email ?? u.Id))
+                    .ToListAsync()
+            };
+
+            return View(vm);
+        }
+
+        // DÜZENLE – POST
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(DonanimDuzenleViewModel vm)
+        {
+            var d = await _db.Donanimlar.FirstOrDefaultAsync(x => x.Id == vm.Id);
+            if (d == null) return NotFound();
+
+            if (!ModelState.IsValid)
+            {
+                var dbKategoriler = await _db.Donanimlar
+                    .Select(x => x.Kategori!)
+                    .Where(x => x != null && x != "")
+                    .Distinct()
+                    .ToListAsync();
+
+                vm.Kategoriler = _kategoriKaynak.Union(dbKategoriler).OrderBy(x => x).ToList();
+                vm.Durumlar = _durumKaynak;
+                vm.KullaniciSecenekleri = await _userManager.Users
+                    .OrderBy(u => u.UserName)
+                    .Select(u => new KeyValuePair<string, string>(u.Id, u.UserName ?? u.Email ?? u.Id))
+                    .ToListAsync();
+
+                return View(vm);
+            }
+
+            d.SeriNo = vm.SeriNo.Trim();
+            d.Model = vm.Model.Trim();
+            d.Kategori = vm.Kategori;
+            d.AlinmaTarihi = vm.AlinmaTarihi;
+
+            if (string.IsNullOrWhiteSpace(vm.AtanacakKullaniciId))
+            {
+                d.AtananKullaniciId = null;
+                d.Durum = string.IsNullOrWhiteSpace(vm.Durum) ? "Boşta" : vm.Durum;
+            }
+            else
+            {
+                d.AtananKullaniciId = vm.AtanacakKullaniciId;
+                d.Durum = "Kullanımda";
+            }
+
+            await _db.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Donanım güncellendi.";
+            return RedirectToAction(nameof(Index));
         }
     }
 }

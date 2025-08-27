@@ -1,32 +1,24 @@
-﻿using System.Collections.Generic;
-
-// Projenizin ad alanına göre güncelleyin
-namespace TalepTakipSistemi.ViewModels
+﻿namespace KEPSAS.TTS.ViewModels
 {
-    // Anasayfadaki talepleri temsil eden basit bir sınıf
-    public class SonTalepViewModel
+    public class DashboardItemVm
     {
         public int Id { get; set; }
-        public string Baslik { get; set; }
-        public string Durum { get; set; }
-        public string OlusturmaTarihi { get; set; }
+        public string Baslik { get; set; } = "";
+        public string Durum { get; set; } = "";
+        public DateTime? OlusturmaTarihi { get; set; }
     }
 
-    // Gösterge panelinin ihtiyaç duyduğu tüm verileri içeren ana model
     public class DashboardViewModel
     {
-        public int UzerimdeTalepler { get; set; }
-        public int OnaysizTalepler { get; set; }
-        public int OnayliTalepler { get; set; }
-        public int YoneticiOnayindaTalepler { get; set; }
-        public int DisServisteTalepler { get; set; }
-        public int GecikmisTalepler { get; set; }
+        // Kartlardaki sayılar (gerçek DB’den)
+        public int Uzerimde { get; set; }
+        public int Onaysiz { get; set; }
+        public int Onayli { get; set; }
+        public int YoneticiOnayinda { get; set; }
+        public int DisServiste { get; set; }
+        public int Gecikmis { get; set; }
 
-        public List<SonTalepViewModel> SonTalepler { get; set; }
-
-        public DashboardViewModel()
-        {
-            SonTalepler = new List<SonTalepViewModel>();
-        }
+        // Son N talep listesi
+        public List<DashboardItemVm> SonTalepler { get; set; } = new();
     }
 }

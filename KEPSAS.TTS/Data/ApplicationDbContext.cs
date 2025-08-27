@@ -28,12 +28,17 @@ namespace KEPSAS.TTS.Data
              .WithMany(t => t.Loglar)
              .HasForeignKey(l => l.TalepId)
              .OnDelete(DeleteBehavior.Cascade);
+            b.Entity<Donanim>()
+             .HasOne(d => d.AtananKullanici)
+             .WithMany()
+             .HasForeignKey(d => d.AtananKullaniciId)
+             .OnDelete(DeleteBehavior.SetNull);
 
             // performans indexleri
             b.Entity<Talep>().HasIndex(t => t.Durum);
             b.Entity<Talep>().HasIndex(t => t.OlusturmaTarihi);
             b.Entity<Talep>().HasIndex(t => t.AtananKullaniciId);
-            b.Entity<Donanim>().ToTable("Donanim");
+            b.Entity<Donanim>().ToTable("Donanimlar");
         }
     }
 }

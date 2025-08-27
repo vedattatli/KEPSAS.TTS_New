@@ -1,28 +1,36 @@
-﻿@model TalepTakipSistemi.ViewModels.DonanimListeViewModel
+﻿@model List<KEPSAS.TTS.Models.Donanim>
 @{
-    ViewData["Title"] = "Kullandığım Donanımlar";
+    ViewData["Title"] = "Donanımlarım";
 }
-
 <div class="content-card">
-    <div class="content-card-header">Üzerinize Atanmış Donanımların Listesi</div>
-    <table class="table content-table mb-0">
+    <div class="content-card-header">Donanımlarım</div>
+    <table class="table mb-0 content-table">
         <thead>
             <tr>
                 <th>Seri No</th>
                 <th>Model</th>
                 <th>Kategori</th>
-                <th></th>
+                <th>Durum</th>
+                <th>Alınma</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var donanim in Model.Donanimlar)
+            @if (!Model.Any())
             {
-                <tr>
-                    <td><strong>@donanim.SeriNo</strong></td>
-                    <td>@donanim.Model</td>
-                    <td>@donanim.Kategori</td>
-                    <td><a href="#" class="btn btn-sm btn-outline-primary">Arıza Bildir</a></td>
-                </tr>
+                <tr><td colspan="5" class="text-center text-muted py-4">Kayıt yok.</td></tr>
+            }
+            else
+            {
+                foreach (var d in Model)
+                {
+                    <tr>
+                        <td>@d.SeriNo</td>
+                        <td>@d.Model</td>
+                        <td>@d.Kategori</td>
+                        <td>@d.Durum</td>
+                        <td>@(d.AlinmaTarihi?.ToString("dd.MM.yyyy"))</td>
+                    </tr>
+                }
             }
         </tbody>
     </table>

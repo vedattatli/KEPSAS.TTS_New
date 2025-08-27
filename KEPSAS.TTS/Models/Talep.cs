@@ -1,4 +1,5 @@
-﻿using System;
+﻿using KEPSAS.TTS.Data;
+using System;
 using System.Collections.Generic;
 
 namespace KEPSAS.TTS.Models
@@ -12,8 +13,12 @@ namespace KEPSAS.TTS.Models
         public DateTime OlusturmaTarihi { get; set; } = DateTime.UtcNow;
 
         // Atama / akış
+        // --- FK + Navigation (NULL olabilir) ---
         public string? OlusturanKullaniciId { get; set; }
+        public ApplicationUser? OlusturanKullanici { get; set; }   // <-- navigation
+
         public string? AtananKullaniciId { get; set; }
+        public ApplicationUser? AtananKullanici { get; set; }      // <-- navigation
         public DateTime? AtamaTarihi { get; set; }
         public DateTime? SonIslemTarihi { get; set; }
 

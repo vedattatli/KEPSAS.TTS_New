@@ -4,16 +4,21 @@
 }
 
 <div class="content-card">
-    <div class="content-card-header">
-        Envantere Yeni Donanım Kaydı
+    <div class="content-card-header d-flex justify-content-between align-items-center">
+        <span>Envantere Yeni Donanım Kaydı</span>
+        <a class="btn btn-sm btn-light" href="@Url.Action("Index", "Donanim")">
+            <i class="fa fa-arrow-left mr-1"></i> Geri
+        </a>
     </div>
-    <form asp-action="Create" method="post">
-        <div class="card-body">
+
+    <div class="p-3">
+        <form asp-action="Create" asp-controller="Donanim" method="post" novalidate>
+            @Html.AntiForgeryToken()
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
             <div class="form-group">
                 <label asp-for="SeriNo"></label>
-                <input asp-for="SeriNo" class="form-control" />
+                <input asp-for="SeriNo" class="form-control" placeholder="Örn: 5CD1234ABC" />
                 <span asp-validation-for="SeriNo" class="text-danger"></span>
             </div>
 
@@ -23,33 +28,58 @@
                 <span asp-validation-for="Model" class="text-danger"></span>
             </div>
 
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label asp-for="Kategori"></label>
-                        <select asp-for="Kategori" class="form-control">
-                            <option value="">Kategori Seçin...</option>
-                            <option>Laptop</option>
-                            <option>Monitör</option>
-                            <option>Klavye</option>
-                            <option>Mouse</option>
-                            <option>Yazıcı</option>
-                        </select>
-                        <span asp-validation-for="Kategori" class="text-danger"></span>
-                    </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label asp-for="Kategori"></label>
+                    <select asp-for="Kategori" class="form-control">
+                        <option value="">Kategori Seçin...</option>
+                        @foreach (var k in Model.Kategoriler)
+                        {
+                            <option value="@k">@k</option>
+                        }
+                    </select>
                 </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label asp-for="AlinmaTarihi"></label>
-                        <input asp-for="AlinmaTarihi" class="form-control" />
-                        <span asp-validation-for="AlinmaTarihi" class="text-danger"></span>
-                    </div>
+
+                <div class="form-group col-md-6">
+                    <label asp-for="AlinmaTarihi"></label>
+                    <input asp-for="AlinmaTarihi" class="form-control" type="date" />
                 </div>
             </div>
-        </div>
-        <div class="card-footer bg-light text-right">
-            <a asp-action="Index" class="btn btn-secondary">İptal</a>
-            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save mr-2"></i>Kaydet</button>
-        </div>
-    </form>
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label asp-for="Durum"></label>
+                    <select asp-for="Durum" class="form-control">
+                        @* Kullanıcı seçilirse sunucuda otomatik "Kullanımda" yapılacak *@
+                        @foreach (var d in Model.Durumlar)
+                        {
+                            <option value="@d" selected="@(d == Model.Durum)">@d</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group col-md-6">
+                    <label asp-for="AtanacakKullaniciId"></label>
+                    <select asp-for="AtanacakKullaniciId" class="form-control">
+                        <option value="">— Boşta / Kimseye atama yapma —</option>
+                        @foreach (var u in Model.KullaniciSecenekleri)
+                        {
+                            <option value="@u.Key">@u.Value</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end">
+                <a href="@Url.Action("Index", "Donanim")" class="btn btn-outline-secondary mr-2">İptal</a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa fa-save mr-1"></i> Kaydet
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,34 +1,99 @@
-﻿// Views/Donanim/Index.cshtml (Admin Envanteri)
-@model TalepTakipSistemi.ViewModels.DonanimListeViewModel
+﻿@model List<KEPSAS.TTS.Models.Donanim>
 @{
-    ViewData["Title"] = "Donanım Envanteri";
+    ViewData["Title"] = "Tüm Donanımlar";
+    var kategoriler = ViewBag.Kategoriler as List<string> ?? new List<string>();
+    var durumlar = ViewBag.Durumlar as List<string> ?? new List<string>();
+    string q = Context.Request.Query["q"];
+    string kategori = Context.Request.Query["kategori"];
+    string durum = Context.Request.Query["durum"];
 }
 
 <div class="content-card">
-    <div class="content-card-header">Tüm Donanımlar</div>
-    <table class="table content-table mb-0">
-        <thead>
-            <tr>
-                <th>Seri No</th>
-                <th>Model</th>
-                <th>Kategori</th>
-                <th>Atanan Kullanıcı</th>
-                <th>Durum</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var donanim in Model.Donanimlar)
-            {
+    <div class="content-card-header d-flex justify-content-between align-items-center">
+        <span>Tüm Donanımlar</span>
+        <a class="btn btn-sm btn-primary" href="@Url.Action("Create", "Donanim")">
+            <i class="fa fa-plus mr-1"></i> Yeni Donanım
+        </a>
+    </div>
+
+    <div class="p-3">
+        <form method="get" class="form-row mb-3">
+            <div class="col-md-4 mb-2">
+                <input name="q" value="@q" class="form-control" placeholder="Seri no / model ara..." />
+            </div>
+            <div class="col-md-3 mb-2">
+                <select name="kategori" class="form-control">
+                    <option value="">Kategori (hepsi)</option>
+                    @foreach (var k in kategoriler)
+                    {
+                        <option value="@k" selected="@(k == kategori)">@k</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3 mb-2">
+                <select name="durum" class="form-control">
+                    <option value="">Durum (hepsi)</option>
+                    @foreach (var d in durumlar)
+                    {
+                        <option value="@d" selected="@(d == durum)">@d</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2 mb-2">
+                <button class="btn btn-block btn-outline-secondary" type="submit">Ara</button>
+            </div>
+        </form>
+
+        <table class="table content-table mb-0">
+            <thead>
                 <tr>
-                    <td><strong>@donanim.SeriNo</strong></td>
-                    <td>@donanim.Model</td>
-                    <td>@donanim.Kategori</td>
-                    <td>@donanim.AtananKullanici</td>
-                    <td><span class="status-badge @(donanim.Durum == "Kullanımda" ? "uzerimde" : "beklemede")">@donanim.Durum</span></td>
-                    <td><a href="#" class="btn btn-sm btn-outline-primary">Detay</a></td>
+                    <th>Seri No</th>
+                    <th>Model</th>
+                    <th>Kategori</th>
+                    <th>Atanan Kullanıcı</th>
+                    <th>Durum</th>
+                    <th>Alınma</th>
+                    <th style="width:120px"></th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @if (Model.Count == 0)
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">Kayıt bulunamadı.</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var d in Model)
+                    {
+                        var atanankullanici =
+                        d.AtananKullanici != null
+                        ? (!string.IsNullOrWhiteSpace(d.AtananKullanici.UserName)
+                        ? d.AtananKullanici.UserName
+                        : (d.AtananKullanici.Email ?? "-"))
+                        : "-";
+
+                        <tr>
+                            <td><strong>@d.SeriNo</strong></td>
+                            <td>@d.Model</td>
+                            <td>@d.Kategori</td>
+                            <td>@atanankullanici</td>
+                            <td>
+                                <span class="status-badge @(d.Durum == "Kullanımda" ? "uzerimde" : d.Durum == "Arızalı" ? "red" : "beklemede")">
+                                    @d.Durum
+                                </span>
+                            </td>
+                            <td>@(d.AlinmaTarihi?.ToString("dd.MM.yyyy") ?? "-")</td>
+                            <td class="text-right">
+                                <a class="btn btn-sm btn-outline-primary" href="@Url.Action("Edit", "Donanim", new { id = d.Id })">
+                                    Düzenle
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
 </div>

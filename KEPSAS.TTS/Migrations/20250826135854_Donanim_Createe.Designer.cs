@@ -4,6 +4,7 @@ using KEPSAS.TTS.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KEPSAS.TTS.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250826135854_Donanim_Createe")]
+    partial class Donanim_Createe
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,6 +24,46 @@ namespace KEPSAS.TTS.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Donanim", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("AlinmaTarihi")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("AtananKullanici")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AtananKullaniciId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Durum")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Kategori")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Model")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("OlusturmaTarihi")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("SeriNo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Donanimlar", (string)null);
+                });
 
             modelBuilder.Entity("KEPSAS.TTS.Data.ApplicationUser", b =>
                 {
@@ -94,45 +137,6 @@ namespace KEPSAS.TTS.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
-                });
-
-            modelBuilder.Entity("KEPSAS.TTS.Models.Donanim", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime?>("AlinmaTarihi")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("AtananKullaniciId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Durum")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Kategori")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Model")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("OlusturmaTarihi")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("SeriNo")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AtananKullaniciId");
-
-                    b.ToTable("Donanimlar", (string)null);
                 });
 
             modelBuilder.Entity("KEPSAS.TTS.Models.Talep", b =>
@@ -384,16 +388,6 @@ namespace KEPSAS.TTS.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
-                });
-
-            modelBuilder.Entity("KEPSAS.TTS.Models.Donanim", b =>
-                {
-                    b.HasOne("KEPSAS.TTS.Data.ApplicationUser", "AtananKullanici")
-                        .WithMany()
-                        .HasForeignKey("AtananKullaniciId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("AtananKullanici");
                 });
 
             modelBuilder.Entity("KEPSAS.TTS.Models.TalepEk", b =>

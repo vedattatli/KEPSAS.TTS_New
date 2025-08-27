@@ -1,47 +1,57 @@
-﻿@model TalepTakipSistemi.ViewModels.DashboardViewModel
+﻿@model KEPSAS.TTS.ViewModels.DashboardViewModel
 @{
     ViewData["Title"] = "Gösterge Paneli";
+    string fmt(DateTime? d) => d.HasValue ? d.Value.ToString("dd.MM.yyyy HH:mm") : "-";
 }
 
-<!-- İstatistik Kartları -->
-<div class="stats-grid">
-    <div class="stat-card" style="--color: #3b82f6;">
-        <div class="icon"><i class="fa-solid fa-user-tag"></i></div>
-        <div class="title">Üzerimde</div>
-        <div class="value">@Model.UzerimdeTalepler</div>
-    </div>
-    <div class="stat-card" style="--color: #ef4444;">
-        <div class="icon"><i class="fa-solid fa-times-circle"></i></div>
-        <div class="title">Onaysız</div>
-        <div class="value">@Model.OnaysizTalepler</div>
-    </div>
-    <div class="stat-card" style="--color: #22c55e;">
-        <div class="icon"><i class="fa-solid fa-check-circle"></i></div>
-        <div class="title">Onaylı</div>
-        <div class="value">@Model.OnayliTalepler</div>
-    </div>
-    <div class="stat-card" style="--color: #f97316;">
-        <div class="icon"><i class="fa-solid fa-user-shield"></i></div>
-        <div class="title">Yönetici Onayında</div>
-        <div class="value">@Model.YoneticiOnayindaTalepler</div>
-    </div>
-    <div class="stat-card" style="--color: #6b7280;">
-        <div class="icon"><i class="fa-solid fa-shipping-fast"></i></div>
-        <div class="title">Dış Serviste</div>
-        <div class="value">@Model.DisServisteTalepler</div>
-    </div>
-    <div class="stat-card" style="--color: #f59e0b;">
-        <div class="icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-        <div class="title">Gecikmiş</div>
-        <div class="value">@Model.GecikmisTalepler</div>
+<div class="content-card mb-4">
+    <div class="content-card-header">Talep Takip Sistemi</div>
+    <div class="row">
+        <div class="col-md-2 mb-3">
+            <div class="stat-card bg-info text-white">
+                <div class="stat-title">Üzerimde</div>
+                <div class="stat-value">@Model.Uzerimde</div>
+            </div>
+        </div>
+        <div class="col-md-2 mb-3">
+            <div class="stat-card bg-danger text-white">
+                <div class="stat-title">Onaysız</div>
+                <div class="stat-value">@Model.Onaysiz</div>
+            </div>
+        </div>
+        <div class="col-md-2 mb-3">
+            <div class="stat-card bg-success text-white">
+                <div class="stat-title">Onaylı</div>
+                <div class="stat-value">@Model.Onayli</div>
+            </div>
+        </div>
+        <div class="col-md-2 mb-3">
+            <div class="stat-card bg-light border">
+                <div class="stat-title">Yön. Onayında</div>
+                <div class="stat-value">@Model.YoneticiOnayinda</div>
+            </div>
+        </div>
+        <div class="col-md-2 mb-3">
+            <div class="stat-card bg-warning text-dark">
+                <div class="stat-title">Dış Serviste</div>
+                <div class="stat-value">@Model.DisServiste</div>
+            </div>
+        </div>
+        <div class="col-md-2 mb-3">
+            <div class="stat-card bg-secondary text-white">
+                <div class="stat-title">Gecikmiş</div>
+                <div class="stat-value">@Model.Gecikmis</div>
+            </div>
+        </div>
     </div>
 </div>
 
-<!-- Son Talepler Tablosu -->
 <div class="content-card">
-    <div class="content-card-header">
-        Son Talepler
+    <div class="content-card-header d-flex justify-content-between align-items-center">
+        <span>Son 20 Talep</span>
+        <a class="btn btn-sm btn-primary" href="@Url.Action("Create", "Talep")">Yeni Talep</a>
     </div>
+
     <table class="table content-table mb-0">
         <thead>
             <tr>
@@ -49,19 +59,30 @@
                 <th>Başlık</th>
                 <th>Durum</th>
                 <th>Oluşturma</th>
-                <th></th>
+                <th style="width:1%"></th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var talep in Model.SonTalepler)
+            @if (Model.SonTalepler.Count == 0)
             {
-                <tr>
-                    <td>#@talep.Id</td>
-                    <td>@talep.Baslik</td>
-                    <td><span class="status-badge @talep.Durum.ToLower()">@talep.Durum</span></td>
-                    <td>@talep.OlusturmaTarihi</td>
-                    <td><a href="@Url.Action("Details", "Talep", new { id = talep.Id })" class="btn btn-sm btn-outline-primary">Aç</a></td>
-                </tr>
+                <tr><td colspan="5" class="text-center text-muted">Kayıt bulunamadı.</td></tr>
+            }
+            else
+            {
+                var i = 1;
+                foreach (var t in Model.SonTalepler)
+                {
+                    <tr>
+                        <td>@i</td>
+                        <td>@t.Baslik</td>
+                        <td>@t.Durum</td>
+                        <td>@fmt(t.OlusturmaTarihi)</td>
+                        <td>
+                            <a class="btn btn-sm btn-outline-primary" href="@Url.Action("Details", "Talep", new { id = t.Id })">Aç</a>
+                        </td>
+                    </tr>
+                    i++;
+                }
             }
         </tbody>
     </table>

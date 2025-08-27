@@ -1,0 +1,38 @@
+﻿@model List<KEPSAS.TTS.Models.Talep>
+@{
+    ViewData["Title"] = "Taleplerim - Raporlar";
+}
+
+<div class="content-card">
+    <div class="content-card-header">Tüm Taleplerim (Geçmiş Dahil)</div>
+
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Başlık</th>
+                <th>Durum</th>
+                <th>Atanan Kullanıcı</th>
+                <th>Oluşturma</th>
+                <th>Son İşlem</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var t in Model)
+            {
+                <tr>
+                    <td>@t.Id</td>
+                    <td>@t.Baslik</td>
+                    <td>
+                        <span class="badge @(t.Durum == "Tamamlandı" ? "badge-success" : "badge-secondary")">
+                            @t.Durum
+                        </span>
+                    </td>
+                    <td>@(t.AtananKullanici?.UserName ?? "-")</td>
+                    <td>@t.OlusturmaTarihi.ToString("dd.MM.yyyy HH:mm")</td>
+                    <td>@(t.SonIslemTarihi?.ToString("dd.MM.yyyy HH:mm") ?? "-")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

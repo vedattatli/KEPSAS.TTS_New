@@ -1,0 +1,66 @@
+﻿@model KEPSAS.TTS.ViewModels.DonanimDuzenleViewModel
+@{
+    ViewData["Title"] = "Donanım Düzenle";
+}
+<div class="content-card">
+    <div class="content-card-header d-flex justify-content-between align-items-center">
+        <span>Donanım Düzenle</span>
+        <a class="btn btn-light" href="@Url.Action("Index", "Donanim")">Geri</a>
+    </div>
+
+    <form asp-action="Edit" method="post" class="p-3">
+        <input type="hidden" asp-for="Id" />
+
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                <label>Seri No</label>
+                <input class="form-control" asp-for="SeriNo" />
+            </div>
+            <div class="form-group col-md-4">
+                <label>Model</label>
+                <input class="form-control" asp-for="Model" />
+            </div>
+            <div class="form-group col-md-4">
+                <label>Kategori</label>
+                <select class="form-control" asp-for="Kategori">
+                    @foreach (var k in Model.Kategoriler)
+                    {
+                        <option value="@k" selected="@(Model.Kategori == k ? "selected" : null)">@k</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                <label>Alınma Tarihi</label>
+                <input class="form-control" asp-for="AlinmaTarihi" type="date" />
+            </div>
+            <div class="form-group col-md-4">
+                <label>Atanacak Kullanıcı</label>
+                <select class="form-control" asp-for="AtanacakKullaniciId">
+                    <option value="">— Boşta —</option>
+                    @foreach (var u in Model.KullaniciSecenekleri)
+                    {
+                        <option value="@u.Key" selected="@(Model.AtanacakKullaniciId == u.Key ? "selected" : null)">
+                            @u.Value
+                        </option>
+                    }
+                </select>
+            </div>
+            <div class="form-group col-md-4">
+                <label>Durum</label>
+                <select class="form-control" asp-for="Durum">
+                    @foreach (var d in Model.Durumlar)
+                    {
+                        <option value="@d" selected="@(Model.Durum == d ? "selected" : null)">@d</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div class="text-right">
+            <button class="btn btn-primary" type="submit">Kaydet</button>
+        </div>
+    </form>
+</div>

@@ -3,12 +3,17 @@
     ViewData["Title"] = "Kullanıcılar";
 }
 
-<!-- DataTables CSS -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap4.min.css" />
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap4.min.css" />
 
 <div class="card card-primary">
-    <div class="card-header"><h3 class="card-title">Kullanıcı Listesi</h3></div>
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="card-title mb-0">Kullanıcı Listesi</h3>
+
+        <a href="@Url.Action("Create", "Users")" class="btn btn-success btn-sm">
+            <i class="fas fa-user-plus mr-1"></i> Yeni Kullanıcı Ekle
+        </a>
+    </div>
     <div class="card-body">
         <table id="usersTable" class="table table-bordered table-striped">
             <thead>
@@ -44,7 +49,6 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <!-- DataTables JS -->
     <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap4.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
