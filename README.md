@@ -65,7 +65,7 @@ dotnet ef database update
 bash
 Copy code
 dotnet run
-Tarayıcıdan http://localhost:5000 aç
+Tarayıcıdan http://localhost:5148 aç
 
 Varsayılan Kullanıcılar:
 
