@@ -1,3 +1,4 @@
+
 # 🚀 KEPSAS TTS – Kurumsal Talep ve Donanım Takip Sistemi
 
 <p align="center">
@@ -179,3 +180,27 @@ Pull request ve issue açabilirsiniz.
 
 📄 LİSANS
 MIT
+
+# İLGİLİ FOTOĞRAFLAR :
+
+
+
+
+
+<img width="577" height="146" alt="Screenshot 2025-08-27 150034" src="https://github.com/user-attachments/assets/c241e22b-efe5-4921-8f36-ccb3bcc0bbe5" />
+<img width="1674" height="831" alt="Screenshot 2025-08-27 145938" src="https://github.com/user-attachments/assets/d686bace-aa7c-4704-a876-0e0304dcd06e" />
+<img width="1684" height="835" alt="Screenshot 2025-08-27 145931" src="https://github.com/user-attachments/assets/19737ffb-061c-4c00-9837-8a5662fca01b" />
+<img width="1656" height="832" alt="Screenshot 2025-08-27 145924" src="https://github.com/user-attachments/assets/c2f3dd38-5b3b-4a5f-8d26-d7d66cce32a0" />
+<img width="1675" height="832" alt="Screenshot 2025-08-27 145910" src="https://github.com/user-attachments/assets/45c53303-265a-4c65-b5f5-f3c2fd8c6e11" />
+<img width="1672" height="828" alt="Screenshot 2025-08-27 145903" src="https://github.com/user-attachments/assets/e1bb08b9-c170-4184-a457-d9a36a82c873" />
+<img width="1649" height="820" alt="Screenshot 2025-08-27 145856" src="https://github.com/user-attachments/assets/2fa8081d-aabb-44d5-9e45-1f8dae701495" />
+<img width="1653" height="822" alt="Screenshot 2025-08-27 145840" src="https://github.com/user-attachments/assets/2ce5c6f7-33f5-4875-99a7-a287f57e3ee1" />
+<img width="1628" height="836" alt="Screenshot 2025-08-27 145830" src="https://github.com/user-attachments/assets/c0eaa572-e431-4060-a892-8423e744e1bb" />
+<img width="1027" height="522" alt="Screenshot 2025-08-27 145023" src="https://github.com/user-attachments/assets/e5266120-aee6-4076-a463-90c5143f1553" />
+<img width="1664" height="853" alt="Screenshot 2025-08-27 144837" src="https://github.com/user-attachments/assets/a4b0e20e-ef0e-44c6-a961-5cac16244929" />
+<img width="1671" height="862" alt="Screenshot 2025-08-27 144824" src="https://github.com/user-attachments/assets/6a42dcd7-6e42-4fcd-af79-2b471f01b99d" />
+<img width="1682" height="831" alt="Screenshot 2025-08-27 144816" src="https://github.com/user-attachments/assets/1c060334-90f4-4398-961f-786b5a4ea27c" />
+<img width="1679" height="861" alt="Screenshot 2025-08-27 144808" src="https://github.com/user-attachments/assets/ce621e7b-75f1-4bcf-9d33-5e2ba04d2ab5" />
+<img width="1668" height="830" alt="Screenshot 2025-08-27 144756" src="https://github.com/user-attachments/assets/92b3b26d-c56a-46b2-b3ca-5e140477b8c1" />
+<img width="1678" height="867" alt="Screenshot 2025-08-27 144747" src="https://github.com/user-attachments/assets/e3e5e60f-4f06-410b-a091-97173366ecfa" />
+<img width="277" height="358" alt="Screenshot 2025-08-27 144030" src="https://github.com/user-attachments/assets/ce0a4aa5-7a83-4626-a7ab-bdcc09f58420" />
