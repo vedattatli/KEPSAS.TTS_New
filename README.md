@@ -166,14 +166,6 @@ graph TD
     A1 --> B1
     A1 --> D1
     K1 --> A1 & B1
-📊 GELECEK YOL HARİTASI
- Docker Compose desteği (App + DB tek komutla)
-
- Bildirim sistemi (e-posta)
-
- Birim ve entegrasyon testleri
-
- SLA ve gelişmiş raporlar
 
 🤝 KATKI
 Pull request ve issue açabilirsiniz.
